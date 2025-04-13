@@ -1,0 +1,4 @@
+include 'dailylogs-service'
+include 'meals-service'
+include 'users-service'
+include 'workouts-service'
