@@ -1,0 +1,84 @@
+# Default Spring Profile
+spring:
+  profiles:
+    active: h2
+
+server:
+  error:
+    include-message: always
+
+logging:
+  level:
+    root: INFO
+    com.kairns: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: h2
+
+  h2:
+    console:
+      enabled: true
+
+  datasource:
+    url: jdbc:h2:mem:fitnesstracker-db;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+
+    defer-datasource-initialization: true
+
+  sql:
+    init:
+      platform: h2
+      mode: always
+      schema-locations: classpath:schema-users.sql
+      data-locations: classpath:data-users.sql
+
+
+
+---
+
+# for docker
+
+
+spring:
+  config:
+    activate:
+      on-profile: docker
+
+
+  datasource:
+    url: jdbc:mysql://mysql1/user-db
+    username: user
+    password: pwd
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: none   #use create to allow jpa to auto-generate from Entity classes; use none to use schema-fitness.sql
+
+
+
+  sql:
+    init:
+      platform: mysql
+      mode: always
+      schema-locations: classpath:schema-users.sql
+      data-locations: classpath:data-users.sql
+
+server.port: 8080
+
+spring.datasource.hikari.initializationFailTimeout: 60000
