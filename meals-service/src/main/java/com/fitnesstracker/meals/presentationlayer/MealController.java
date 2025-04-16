@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/v1/{userId}/meals")
+@RequestMapping("api/v1/meals")
 public class MealController {
     private final MealService mealService;
     private static final int UUID_LENGTH = 36;
