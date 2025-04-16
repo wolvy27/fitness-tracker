@@ -4,6 +4,7 @@ package com.fitnesstracker.workouts.businesslayer;
 
 
 import com.fitnesstracker.workouts.dataaccesslayer.Workout;
+import com.fitnesstracker.workouts.dataaccesslayer.WorkoutIdentifier;
 import com.fitnesstracker.workouts.dataaccesslayer.WorkoutRepository;
 import com.fitnesstracker.workouts.dataaccesslayer.WorkoutType;
 import com.fitnesstracker.workouts.datamapperlayer.WorkoutRequestMapper;
@@ -21,25 +22,28 @@ public class WorkoutServiceImpl implements WorkoutService {
     private WorkoutRepository workoutRepository;
     private WorkoutResponseMapper workoutResponseMapper;
     private WorkoutRequestMapper workoutRequestMapper;
-    private UserRepository userRepository;
+    //private UserRepository userRepository;
     //private DailyLogRepository dailyLogRepository;
 
-    public WorkoutServiceImpl(WorkoutRepository workoutRepository, WorkoutResponseMapper workoutResponseMapper, WorkoutRequestMapper workoutRequestMapper, UserRepository userRepository) {
+    public WorkoutServiceImpl(WorkoutRepository workoutRepository, WorkoutResponseMapper workoutResponseMapper, WorkoutRequestMapper workoutRequestMapper) {
         this.workoutRepository = workoutRepository;
         this.workoutResponseMapper = workoutResponseMapper;
         this.workoutRequestMapper = workoutRequestMapper;
-        this.userRepository = userRepository;
+        //this.userRepository = userRepository;
         //this.dailyLogRepository = dailyLogRepository;
     }
     // Also to push change
 
     @Override
-    public List<WorkoutResponseModel> getWorkouts(String userId) {
+    public List<WorkoutResponseModel> getWorkouts() {
+        /*
         User foundUser = userRepository.findUserByUserIdentifier_UserId(userId);
         if (foundUser == null) {
             throw new NotFoundException("UserId not found: " + userId);
         }
-        List<Workout> workouts = workoutRepository.findAllByUserIdentifier_UserId(userId);
+
+         */
+        List<Workout> workouts = workoutRepository.findAll();
         List<Workout> filteredWorkouts = new ArrayList<>();
 
         for (Workout workout : workouts) {
@@ -51,28 +55,35 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
     @Override
-    public WorkoutResponseModel getWorkoutByWorkoutId(String workoutId, String userId) {
-        Workout foundWorkout = workoutRepository.findWorkoutByWorkoutIdentifier_WorkoutIdAndUserIdentifier_UserId(workoutId, userId);
+    public WorkoutResponseModel getWorkoutByWorkoutId(String workoutId) {
+        //Workout foundWorkout = workoutRepository.findWorkoutByWorkoutIdentifier_WorkoutIdAndUserIdentifier_UserId(workoutId, userId);
+        Workout foundWorkout = workoutRepository.findWorkoutByWorkoutIdentifier_WorkoutId(workoutId);
         if (foundWorkout == null || foundWorkout.getWorkoutType() == WorkoutType.NONE) {
             throw new NotFoundException("WorkoutId not found: " + workoutId);
         }
+        /*
         User foundUser = userRepository.findUserByUserIdentifier_UserId(userId);
         if (foundUser == null) {
             throw new NotFoundException("UserId not found: " + userId);
         }
+
+         */
 
         return workoutResponseMapper.entityToResponseModel(foundWorkout);
     }
 
     @Override
-    public WorkoutResponseModel addWorkout(WorkoutRequestModel newWorkoutData, String userId) {
+    public WorkoutResponseModel addWorkout(WorkoutRequestModel newWorkoutData) {
+        /*
         User foundUser = userRepository.findUserByUserIdentifier_UserId(userId);
         if (foundUser == null) {
             throw new NotFoundException("UserId not found: " + userId);
         }
+
+         */
         Workout workout = workoutRequestMapper.requestModelToEntity(newWorkoutData);
         workout.setWorkoutIdentifier(new WorkoutIdentifier());
-        workout.setUserIdentifier(foundUser.getUserIdentifier());
+        //workout.setUserIdentifier(foundUser.getUserIdentifier());
         Workout savedWorkout = workoutRepository.save(workout);
 
         /*
@@ -86,18 +97,22 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
     @Override
-    public WorkoutResponseModel updateWorkout(WorkoutRequestModel newWorkoutData, String workoutId, String userId) {
-        Workout foundWorkout = workoutRepository.findWorkoutByWorkoutIdentifier_WorkoutIdAndUserIdentifier_UserId(workoutId, userId);
+    public WorkoutResponseModel updateWorkout(WorkoutRequestModel newWorkoutData, String workoutId) {
+        //Workout foundWorkout = workoutRepository.findWorkoutByWorkoutIdentifier_WorkoutIdAndUserIdentifier_UserId(workoutId, userId);
+        Workout foundWorkout = workoutRepository.findWorkoutByWorkoutIdentifier_WorkoutId(workoutId);
         if (foundWorkout == null || foundWorkout.getWorkoutType() == WorkoutType.NONE) {
             throw new NotFoundException("WorkoutId not found: " + workoutId);
         }
+        /*
         User foundUser = userRepository.findUserByUserIdentifier_UserId(userId);
         if (foundUser == null) {
             throw new NotFoundException("UserId not found: " + userId);
         }
+
+         */
         Workout updatedWorkout = workoutRequestMapper.requestModelToEntity(newWorkoutData);
         updatedWorkout.setWorkoutIdentifier(foundWorkout.getWorkoutIdentifier());
-        updatedWorkout.setUserIdentifier(foundWorkout.getUserIdentifier());
+        //updatedWorkout.setUserIdentifier(foundWorkout.getUserIdentifier());
         updatedWorkout.setId(foundWorkout.getId());
 
         /*
@@ -112,15 +127,19 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
     @Override
-    public void deleteWorkout(String workoutId, String userId) {
-        Workout foundWorkout = workoutRepository.findWorkoutByWorkoutIdentifier_WorkoutIdAndUserIdentifier_UserId(workoutId, userId);
+    public void deleteWorkout(String workoutId) {
+        //Workout foundWorkout = workoutRepository.findWorkoutByWorkoutIdentifier_WorkoutIdAndUserIdentifier_UserId(workoutId, userId);
+        Workout foundWorkout = workoutRepository.findWorkoutByWorkoutIdentifier_WorkoutId(workoutId);
         if (foundWorkout == null || foundWorkout.getWorkoutType() == WorkoutType.NONE) {
             throw new NotFoundException("WorkoutId not found: " + workoutId);
         }
+        /*
         User foundUser = userRepository.findUserByUserIdentifier_UserId(userId);
         if (foundUser == null) {
             throw new NotFoundException("UserId not found: " + userId);
         }
+
+         */
 
         /*
         DailyLog dailyLog = dailyLogRepository.findDailyLogByLogDateAndUserIdentifier_UserId(foundWorkout.getWorkoutDate(), userId);
@@ -137,6 +156,7 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
 
+    /*
     @Override
     public String getWorkoutNameByWorkoutId(String workoutId, String userId) {
         Workout workout = workoutRepository.findWorkoutByWorkoutIdentifier_WorkoutIdAndUserIdentifier_UserId(workoutId, userId);
@@ -156,6 +176,8 @@ public class WorkoutServiceImpl implements WorkoutService {
         }
         return workout.getDurationInMinutes();
     }
+
+     */
 
 
 }

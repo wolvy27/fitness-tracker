@@ -1,0 +1,113 @@
+services:
+  api-gateway:
+    build: ./api-gateway
+    hostname: api-gateway
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - users-service
+      - workouts-service
+      - meals-service
+
+  # User Service
+  users-service:
+    build: ./users-service
+    hostname: users-service
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-users/users-db
+      - SPRING_SQL_INIT_MODE=never
+    depends_on:
+      mysql-users:
+        condition: service_healthy
+
+  # Workout Service
+  workouts-service:
+    build: ./workouts-service
+    hostname: workouts-service
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-workouts/workouts-db
+      - SPRING_SQL_INIT_MODE=never
+    depends_on:
+      mysql-workouts:
+        condition: service_healthy
+
+  # Meal Service
+  meals-service:
+    build: ./meals-service
+    hostname: meals-service
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-meals/meals-db
+      - SPRING_SQL_INIT_MODE=never
+    depends_on:
+      postgres-meals:
+        condition: service_healthy
+
+  # User Database
+  mysql-users:
+    image: mysql:5.7
+    hostname: mysql-users
+    ports:
+      - "3307:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpwd
+      - MYSQL_DATABASE=users-db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=pwd
+    volumes:
+      - ./data/mysql-users:/var/lib/mysql
+      - ./users-service/data/init.d:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-uuser", "-ppwd", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # Workout Database
+  mysql-workouts:
+    image: mysql:5.7
+    hostname: mysql-workouts
+    ports:
+      - "3308:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpwd
+      - MYSQL_DATABASE=workouts-db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=pwd
+    volumes:
+      - ./data/mysql-workouts:/var/lib/mysql
+      - ./workouts-service/data/init.d:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-uuser", "-ppwd", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # Meal Database
+  postgres-meals:
+    image: postgres:latest
+    hostname: postgres-meals
+    environment:
+      - POSTGRES_USER=user
+      - PGUSER=user
+      - POSTGRES_PASSWORD=pwd
+      - POSTGRES_DB=meals-db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data/postgres-meals:/var/lib/postgresql/data
+    healthcheck:
+      test: "pg_isready -h localhost"
+      interval: 10s
+      timeout: 5s
+      retries: 5

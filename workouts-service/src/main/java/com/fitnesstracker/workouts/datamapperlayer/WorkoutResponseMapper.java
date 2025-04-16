@@ -18,7 +18,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @Mapper(componentModel = "spring")
 public interface WorkoutResponseMapper {
     @Mapping(source = "workoutIdentifier.workoutId", target = "workoutId")
-    @Mapping(source = "userIdentifier.userId", target = "userId")
+    //@Mapping(source = "userIdentifier.userId", target = "userId")
     @Mapping(source = "workoutName", target = "workoutName")
     @Mapping(source = "workoutType", target = "workoutType")
     @Mapping(source = "durationInMinutes", target = "durationInMinutes")
@@ -30,12 +30,12 @@ public interface WorkoutResponseMapper {
     @AfterMapping()
     default void addLinks(@MappingTarget WorkoutResponseModel workoutResponseModel, Workout workout) {
         Link selfLink = linkTo(methodOn(WorkoutController.class)
-                .getWorkout(workoutResponseModel.getWorkoutId(), workoutResponseModel.getUserId()))
+                .getWorkout(workoutResponseModel.getWorkoutId()))
                 .withSelfRel();
         workoutResponseModel.add(selfLink);
 
         Link allWorkoutsLink = linkTo(methodOn(WorkoutController.class)
-                .getWorkouts(workoutResponseModel.getUserId()))
+                .getWorkouts())
                 .withRel("allWorkoutsForUser");
         workoutResponseModel.add(allWorkoutsLink);
     }

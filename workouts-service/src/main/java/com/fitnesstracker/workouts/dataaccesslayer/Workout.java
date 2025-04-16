@@ -18,8 +18,8 @@ public class Workout {
     @Embedded
     private WorkoutIdentifier workoutIdentifier;
 
-    @Embedded
-    private UserIdentifier userIdentifier;
+    //@Embedded
+    //private UserIdentifier userIdentifier;
 
     @Column(name="workout_name")
     private String workoutName;

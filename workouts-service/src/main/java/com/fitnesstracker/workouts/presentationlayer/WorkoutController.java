@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/v1/{userId}/workouts")
+@RequestMapping("api/v1/workouts")
 public class WorkoutController {
     private final WorkoutService workoutService;
     private static final int UUID_LENGTH = 36;
@@ -20,52 +20,37 @@ public class WorkoutController {
     }
 
     @GetMapping()
-    public ResponseEntity<List<WorkoutResponseModel>> getWorkouts(@PathVariable String userId) {
-        if (userId.length() != UUID_LENGTH) {
-            throw new NotFoundException("Invalid userId provided: " + userId);
-        }
-        return ResponseEntity.ok().body(workoutService.getWorkouts(userId));
+    public ResponseEntity<List<WorkoutResponseModel>> getWorkouts() {
+        return ResponseEntity.ok().body(workoutService.getWorkouts());
     }
 
     @GetMapping("/{workoutId}")
-    public ResponseEntity<WorkoutResponseModel> getWorkout(@PathVariable String workoutId, @PathVariable String userId) {
-        if (userId.length() != UUID_LENGTH) {
-            throw new NotFoundException("Invalid userId provided: " + userId);
-        }
+    public ResponseEntity<WorkoutResponseModel> getWorkout(@PathVariable String workoutId) {
         if (workoutId.length() != UUID_LENGTH) {
             throw new NotFoundException("Invalid workoutId provided: " + workoutId);
         }
-        return ResponseEntity.ok().body(workoutService.getWorkoutByWorkoutId(workoutId, userId));
+        return ResponseEntity.ok().body(workoutService.getWorkoutByWorkoutId(workoutId));
     }
 
     @PostMapping()
-    public ResponseEntity<WorkoutResponseModel> addWorkout(@PathVariable String userId, @RequestBody WorkoutRequestModel workoutRequestModel) {
-        if (userId.length() != UUID_LENGTH) {
-            throw new NotFoundException("Invalid userId provided: " + userId);
-        }
-        return ResponseEntity.ok().body(workoutService.addWorkout(workoutRequestModel, userId));
+    public ResponseEntity<WorkoutResponseModel> addWorkout(@RequestBody WorkoutRequestModel workoutRequestModel) {
+        return ResponseEntity.ok().body(workoutService.addWorkout(workoutRequestModel));
     }
 
     @PutMapping("/{workoutId}")
-    public ResponseEntity<WorkoutResponseModel> updateWorkout(@RequestBody WorkoutRequestModel workoutRequestModel, @PathVariable String workoutId, @PathVariable String userId) {
-        if (userId.length() != UUID_LENGTH) {
-            throw new NotFoundException("Invalid userId provided: " + userId);
-        }
+    public ResponseEntity<WorkoutResponseModel> updateWorkout(@RequestBody WorkoutRequestModel workoutRequestModel, @PathVariable String workoutId) {
         if (workoutId.length() != UUID_LENGTH) {
             throw new NotFoundException("Invalid workoutId provided: " + workoutId);
         }
-        return ResponseEntity.created(null).body(workoutService.updateWorkout(workoutRequestModel, workoutId, userId));
+        return ResponseEntity.created(null).body(workoutService.updateWorkout(workoutRequestModel, workoutId));
     }
 
     @DeleteMapping("/{workoutId}")
-    public ResponseEntity<Void> deleteWorkout(@PathVariable String workoutId, @PathVariable String userId) {
-        if (userId.length() != UUID_LENGTH) {
-            throw new NotFoundException("Invalid userId provided: " + userId);
-        }
+    public ResponseEntity<Void> deleteWorkout(@PathVariable String workoutId) {
         if (workoutId.length() != UUID_LENGTH) {
             throw new NotFoundException("Invalid workoutId provided: " + workoutId);
         }
-        workoutService.deleteWorkout(workoutId, userId);
+        workoutService.deleteWorkout(workoutId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 

@@ -26,7 +26,7 @@ spring:
       enabled: true
 
   datasource:
-    url: jdbc:h2:mem:users-db;DB_CLOSE_DELAY=-1
+    url: jdbc:h2:mem:meals-db;DB_CLOSE_DELAY=-1
     driver-class-name: org.h2.Driver
     username: sa
     password:
@@ -44,8 +44,8 @@ spring:
     init:
       platform: h2
       mode: always
-      schema-locations: classpath:schema-users.sql
-      data-locations: classpath:data-users.sql
+      schema-locations: classpath:schema-psql.sql
+      data-locations: classpath:data-psql.sql
 
 ---
 
@@ -56,7 +56,7 @@ spring:
       on-profile: docker
 
   datasource:
-    url: jdbc:mysql://mysql-users/users-db
+    url: jdbc:postgresql://postgres-meals/meals-db
     username: user
     password: pwd
 
@@ -65,13 +65,18 @@ spring:
     hibernate:
       ddl-auto: none   #use create to allow jpa to auto-generate from Entity classes; use none to use schema-fitness.sql
 
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        auto-quote-keyword: true
+
   sql:
     init:
-      platform: mysql
+      platform: psql
       mode: always
-      schema-locations: classpath:schema-users.sql
-      data-locations: classpath:data-users.sql
+      schema-locations: classpath:schema-psql.sql
+      data-locations: classpath:data-psql.sql
 
-server.port: 8080
+server.port: 8082
 
 spring.datasource.hikari.initializationFailTimeout: 60000

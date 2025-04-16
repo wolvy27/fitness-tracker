@@ -26,7 +26,7 @@ spring:
       enabled: true
 
   datasource:
-    url: jdbc:h2:mem:users-db;DB_CLOSE_DELAY=-1
+    url: jdbc:h2:mem:workouts-db;DB_CLOSE_DELAY=-1
     driver-class-name: org.h2.Driver
     username: sa
     password:
@@ -44,8 +44,8 @@ spring:
     init:
       platform: h2
       mode: always
-      schema-locations: classpath:schema-users.sql
-      data-locations: classpath:data-users.sql
+      schema-locations: classpath:schema.sql
+      data-locations: classpath:data.sql
 
 ---
 
@@ -56,7 +56,7 @@ spring:
       on-profile: docker
 
   datasource:
-    url: jdbc:mysql://mysql-users/users-db
+    url: jdbc:mysql://mysql-workouts/workouts-db
     username: user
     password: pwd
 
@@ -69,9 +69,9 @@ spring:
     init:
       platform: mysql
       mode: always
-      schema-locations: classpath:schema-users.sql
-      data-locations: classpath:data-users.sql
+      schema-locations: classpath:schema.sql
+      data-locations: classpath:data.sql
 
-server.port: 8080
+server.port: 8081
 
 spring.datasource.hikari.initializationFailTimeout: 60000

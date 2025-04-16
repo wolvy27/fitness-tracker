@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WorkoutRequestModel {
-    private String userId;
+    //private String userId;
     private String workoutName;
     private WorkoutType workoutType;
     private Integer durationInMinutes;

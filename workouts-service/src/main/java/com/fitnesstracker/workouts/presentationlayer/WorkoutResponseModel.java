@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class WorkoutResponseModel extends RepresentationModel<WorkoutResponseModel> {
     private String workoutId;
-    private String userId;
+    //private String userId;
     private String workoutName;
     private WorkoutType workoutType;
     private Integer durationInMinutes;

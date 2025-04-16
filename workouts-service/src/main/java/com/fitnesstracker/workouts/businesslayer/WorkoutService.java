@@ -10,13 +10,13 @@ import com.fitnesstracker.workouts.presentationlayer.WorkoutResponseModel;
 import java.util.List;
 
 public interface WorkoutService {
-    List<WorkoutResponseModel> getWorkouts(String userId);
-    WorkoutResponseModel getWorkoutByWorkoutId(String workoutId, String userId);
-    WorkoutResponseModel addWorkout(WorkoutRequestModel newWorkoutData, String userId);
-    WorkoutResponseModel updateWorkout(WorkoutRequestModel newWorkoutData, String workoutId, String userId);
-    void deleteWorkout(String workoutId, String userId);
+    List<WorkoutResponseModel> getWorkouts();
+    WorkoutResponseModel getWorkoutByWorkoutId(String workoutId);
+    WorkoutResponseModel addWorkout(WorkoutRequestModel newWorkoutData);
+    WorkoutResponseModel updateWorkout(WorkoutRequestModel newWorkoutData, String workoutId);
+    void deleteWorkout(String workoutId);
 
     // For DailyLog aggregate
-    String getWorkoutNameByWorkoutId(String workoutId, String userId);
-    Integer getDurationInMinutesByWorkoutId(String workoutId, String userId);
+    //String getWorkoutNameByWorkoutId(String workoutId, String userId);
+    //Integer getDurationInMinutesByWorkoutId(String workoutId, String userId);
 }

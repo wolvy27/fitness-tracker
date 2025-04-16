@@ -9,7 +9,7 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface WorkoutRequestMapper {
-    @Mapping(source = "userId", target = "userIdentifier.userId")
+    //@Mapping(source = "userId", target = "userIdentifier.userId")
     @Mapping(source = "workoutName", target = "workoutName")
     @Mapping(source = "workoutType", target = "workoutType")
     @Mapping(source = "durationInMinutes", target = "durationInMinutes")
