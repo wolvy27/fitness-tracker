@@ -1,0 +1,26 @@
+@startuml C4_Level2_FitnessTracker
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "Fitness App User", "Tracks their fitness via the application")
+
+System_Boundary(fitnessApp, "FitnessTracker") {
+    Container(webApp, "Spring Boot REST API", "Java (Spring)", "Handles all business logic and HTTP requests")
+    Container(db, "MySQL Database", "Relational Database", "Stores user, workout, meal, and log info")
+
+    Container(userController, "User Subdomain", "REST Controller", "Handles user operations")
+    Container(workoutController, "Workout Subdomain", "REST Controller", "Handles workouts")
+    Container(mealController, "Meal Subdomain", "REST Controller", "Handles meal logging")
+    Container(dailyLogController, "Daily Log Subdomain", "REST Controller", "Handles daily logs")
+}
+
+Rel(user, webApp, "Sends HTTP requests", "JSON/HTTPS")
+Rel(webApp, db, "Reads/Writes")
+
+Rel(webApp, userController, "Uses")
+Rel(webApp, workoutController, "Uses")
+Rel(webApp, mealController, "Uses")
+Rel(webApp, dailyLogController, "Uses")
+
+
+
+@enduml

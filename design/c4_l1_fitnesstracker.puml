@@ -1,0 +1,13 @@
+@startuml C4_Level1_FitnessTracker
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+Person(user, "Fitness App User", "A user tracking their fitness progress")
+
+System(fitnessApp, "FitnessTracker", "Allows users to log meals, workouts, and daily goals")
+
+System_Ext(database, "H2 Database", "Stores user, workout, meal, and log data")
+
+Rel(user, fitnessApp, "Uses")
+Rel(fitnessApp, database, "Reads/Writes data to")
+
+@enduml

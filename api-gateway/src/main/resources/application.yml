@@ -1,0 +1,46 @@
+# Default Spring Profile
+server:
+  error:
+    include-message: always
+logging:
+  level:
+    root: INFO
+    com.kairns: DEBUG
+
+app:
+  users-service:
+    host: localhost
+    port: 8080
+  workouts-service:
+    host: localhost
+    port: 8081
+  meals-service:
+    host: localhost
+    port: 8082
+  dailylog-service:
+    host: localhost
+    port: 8083
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: docker
+
+server.port: 8084
+
+app:
+  users-service:
+    #must match Docker host name
+    host: users-service
+    port: 8080
+  workouts-service:
+    host: workouts-service
+    port: 8081
+  meals-service:
+    host: meals-service
+    port: 8082
+  dailylogs-service:
+    host: dailylog-service
+    port: 8083
