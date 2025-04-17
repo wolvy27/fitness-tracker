@@ -3,13 +3,14 @@ package com.fitnesstracker.apigateway.presentationlayer.users;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.hateoas.RepresentationModel;
 
 import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserResponseModel {
+public class UserResponseModel extends RepresentationModel<UserResponseModel> {
 
     String userId;
     String firstName;

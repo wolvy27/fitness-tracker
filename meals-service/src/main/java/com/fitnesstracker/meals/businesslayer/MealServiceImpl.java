@@ -9,6 +9,7 @@ import com.fitnesstracker.meals.datamapperlayer.MealRequestMapper;
 import com.fitnesstracker.meals.datamapperlayer.MealResponseMapper;
 import com.fitnesstracker.meals.presentationlayer.MealRequestModel;
 import com.fitnesstracker.meals.presentationlayer.MealResponseModel;
+import com.fitnesstracker.meals.utils.exceptions.InvalidCaloriesException;
 import com.fitnesstracker.meals.utils.exceptions.NotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -78,6 +79,9 @@ public class MealServiceImpl implements MealService {
         }
 
          */
+        if (newMealData.getCalories() < 0) {
+            throw new InvalidCaloriesException("Invalid Calories: " + newMealData.getCalories());
+        }
         Meal meal = mealRequestMapper.requestModelToEntity(newMealData);
         meal.setMealIdentifier(new MealIdentifier());
         //meal.setUserIdentifier(foundUser.getUserIdentifier());
@@ -100,6 +104,9 @@ public class MealServiceImpl implements MealService {
         Meal foundMeal = mealRepository.findMealByMealIdentifier_MealId(mealId);
         if (foundMeal == null || foundMeal.getMealType() == MealType.NONE) {
             throw new NotFoundException("MealId not found: " + mealId);
+        }
+        if (newMealData.getCalories() < 0) {
+            throw new InvalidCaloriesException("Invalid Calories: " + newMealData.getCalories());
         }
         /*
         User foundUser = userRepository.findUserByUserIdentifier_UserId(userId);

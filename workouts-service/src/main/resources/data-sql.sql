@@ -1,3 +1,5 @@
+DELETE FROM workouts;
+
 -- Workouts Table
 -- Alice (Monday, Wednesday, Friday)
 INSERT INTO workouts (workout_id, workout_name, workout_type, duration_in_minutes, workout_date)

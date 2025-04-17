@@ -2,9 +2,15 @@ package com.fitnesstracker.users.datamapperlayer;
 
 
 import com.fitnesstracker.users.dataaccesslayer.User;
+import com.fitnesstracker.users.presentationlayer.UserController;
 import com.fitnesstracker.users.presentationlayer.UserResponseModel;
+import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import java.util.List;
 
@@ -22,4 +28,21 @@ public interface UserResponseMapper {
     UserResponseModel entityToResponseModel(User user);
 
     List<UserResponseModel> entityListToResponseModelList(List<User> users);
+
+    @AfterMapping()
+    default void addLinks(@MappingTarget UserResponseModel userResponseModel, User user) {
+        // Self link (GET user by ID)
+        userResponseModel.add(
+                linkTo(methodOn(UserController.class)
+                        .getUser(userResponseModel.getUserId()))
+                        .withSelfRel()
+        );
+
+        // Link to get all users
+        userResponseModel.add(
+                linkTo(methodOn(UserController.class)
+                        .getUsers())
+                        .withRel("allUsers")
+        );
+    }
 }

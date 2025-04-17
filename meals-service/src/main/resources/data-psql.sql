@@ -1,3 +1,4 @@
+DELETE FROM meals;
 -- Meals Table
 -- Alice
 INSERT INTO meals (meal_id, meal_name, calories, meal_date, meal_type)

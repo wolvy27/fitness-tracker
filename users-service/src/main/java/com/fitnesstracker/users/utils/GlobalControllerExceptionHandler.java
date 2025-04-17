@@ -4,6 +4,7 @@ package com.fitnesstracker.users.utils;
 
 import com.fitnesstracker.users.utils.exceptions.InvalidInputException;
 import com.fitnesstracker.users.utils.exceptions.NotFoundException;
+import com.fitnesstracker.users.utils.exceptions.InvalidCaloricIntakeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -11,8 +12,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
-import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
+import static org.springframework.http.HttpStatus.*;
 
 @RestControllerAdvice
 @Slf4j
@@ -28,6 +28,12 @@ public class GlobalControllerExceptionHandler {
     @ExceptionHandler(InvalidInputException.class)
     public HttpErrorInfo handleInvalidInputException(WebRequest request, Exception ex) {
         return createHttpErrorInfo(UNPROCESSABLE_ENTITY, request, ex);
+    }
+
+    @ResponseStatus(BAD_REQUEST)
+    @ExceptionHandler(InvalidCaloricIntakeException.class)
+    public HttpErrorInfo handleInvalidCaloricIntakeException(WebRequest request, InvalidCaloricIntakeException ex) {
+        return createHttpErrorInfo(BAD_REQUEST, request, ex);
     }
 
 

@@ -9,6 +9,7 @@ import com.fitnesstracker.users.datamapperlayer.UserRequestMapper;
 import com.fitnesstracker.users.datamapperlayer.UserResponseMapper;
 import com.fitnesstracker.users.presentationlayer.UserRequestModel;
 import com.fitnesstracker.users.presentationlayer.UserResponseModel;
+import com.fitnesstracker.users.utils.exceptions.InvalidCaloricIntakeException;
 import com.fitnesstracker.users.utils.exceptions.NotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -43,6 +44,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseModel addUser(UserRequestModel newUserData) {
+        if (newUserData.getDailyCaloricIntake() != null && newUserData.getDailyCaloricIntake() < 0) {
+            throw new InvalidCaloricIntakeException("Daily caloric intake cannot be negative.");
+        }
         Goal goal = new Goal(newUserData.getGoalDescription(), newUserData.getDailyCaloricIntake(), newUserData.getWorkoutDays());
         User user = userRequestMapper.requestModelToEntity(newUserData);
         user.setUserIdentifier(new UserIdentifier());
@@ -55,6 +59,9 @@ public class UserServiceImpl implements UserService {
         User foundUser = userRepository.findUserByUserIdentifier_UserId(userId);
         if (foundUser == null) {
             throw new NotFoundException("UserId not found: " + userId);
+        }
+        if (newUserData.getDailyCaloricIntake() != null && newUserData.getDailyCaloricIntake() < 0) {
+            throw new InvalidCaloricIntakeException("Daily caloric intake cannot be negative.");
         }
         Goal goal = new Goal(newUserData.getGoalDescription(), newUserData.getDailyCaloricIntake(), newUserData.getWorkoutDays());
         User updatedUser = userRequestMapper.requestModelToEntity(newUserData);

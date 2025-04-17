@@ -11,6 +11,7 @@ import com.fitnesstracker.workouts.datamapperlayer.WorkoutRequestMapper;
 import com.fitnesstracker.workouts.datamapperlayer.WorkoutResponseMapper;
 import com.fitnesstracker.workouts.presentationlayer.WorkoutRequestModel;
 import com.fitnesstracker.workouts.presentationlayer.WorkoutResponseModel;
+import com.fitnesstracker.workouts.utils.exceptions.InvalidWorkoutDurationException;
 import com.fitnesstracker.workouts.utils.exceptions.NotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -81,6 +82,9 @@ public class WorkoutServiceImpl implements WorkoutService {
         }
 
          */
+        if (newWorkoutData.getDurationInMinutes() < 0) {
+            throw new InvalidWorkoutDurationException("Invalid duration: " + newWorkoutData.getDurationInMinutes());
+        }
         Workout workout = workoutRequestMapper.requestModelToEntity(newWorkoutData);
         workout.setWorkoutIdentifier(new WorkoutIdentifier());
         //workout.setUserIdentifier(foundUser.getUserIdentifier());
@@ -102,6 +106,9 @@ public class WorkoutServiceImpl implements WorkoutService {
         Workout foundWorkout = workoutRepository.findWorkoutByWorkoutIdentifier_WorkoutId(workoutId);
         if (foundWorkout == null || foundWorkout.getWorkoutType() == WorkoutType.NONE) {
             throw new NotFoundException("WorkoutId not found: " + workoutId);
+        }
+        if (newWorkoutData.getDurationInMinutes() < 0) {
+            throw new InvalidWorkoutDurationException("Invalid duration: " + newWorkoutData.getDurationInMinutes());
         }
         /*
         User foundUser = userRepository.findUserByUserIdentifier_UserId(userId);

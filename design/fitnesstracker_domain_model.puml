@@ -1,0 +1,165 @@
+@startuml
+hide circle
+top to bottom direction
+scale 0.2
+!define ENTITY(entityName) class entityName << Entity >>
+!define ENUM(enumName) class enumName << Enum >>
+!define AGGREGATE(aggregateName) class aggregateName << Aggregate >>
+!define AGGREGATE_ROOT(aggregateRootName) class aggregateRootName << Aggregate Root >>
+!define AGGREGATE_ROOT_ENTITY(aggregateRootEntityName) class aggregateRootEntityName << Aggregate Root >> << Entity >>
+!define VALUE_OBJECT(valueObjectName) class valueObjectName << Value Object >>
+!pragma useVerticalIf on
+skinparam dpi 350
+skinparam packageStyle rectangle
+skinparam rectangle {
+    BackgroundColor #f7f4eb
+    BorderColor Black
+}
+rectangle "Fitness Tracker Context" as BoundedContextFitnessTracker #line.dashed {
+    Package "User Sub-Domain" as User <<Rectangle>> #LightGreen {
+        ENTITY(USER) #lightPink{
+            firstName: FirstName
+            lastName: String
+            age: int
+            heightInCm: int
+            weightInKg: int
+            goal: Goal
+        }
+
+        VALUE_OBJECT(UserIdentifier) #Bisque{
+            UserId: UUID
+        }
+
+        VALUE_OBJECT(Goal) #Bisque{
+            goalDescription: String
+            dailyCaloricIntake: int
+            workoutDays: Set<DayOfWeek>
+        }
+
+        USER --> UserIdentifier
+        USER --> Goal
+    }
+
+    Package "Workout Sub-Domain" as Workout <<Rectangle>> #DFBDF4 {
+        ENTITY(WORKOUT) #lightPink{
+            workoutName: String
+            workoutType: WorkoutType
+            durationInMinutes: int
+            workoutDate: LocalDate
+        }
+
+        ENUM(WorkoutType){
+            CARDIO
+            STRENGTH
+            FLEXIBILITY
+            HIGH-INTENSITY
+            AQUATIC
+            NONE
+        }
+
+        VALUE_OBJECT(WorkoutIdentifier) #Bisque{
+            WorkoutId: UUID
+        }
+
+        WORKOUT --> WorkoutIdentifier
+        WORKOUT"1" o--> "1"WorkoutType
+    }
+
+    Package "Meal Sub-Domain" as Meal <<Rectangle>> #LightBlue {
+            ENTITY(MEAL) #lightPink{
+                mealName: String
+                calories: int
+                mealDate: LocalDate
+                mealType: String
+            }
+
+            VALUE_OBJECT(MealIdentifier) #Bisque{
+                MealId: UUID
+            }
+
+            ENUM(MealType){
+                BREAKFAST
+                LUNCH
+                DINNER
+                SNACK
+                NONE
+            }
+
+            MEAL --> MealIdentifier
+            MEAL --> MealType
+        }
+    Package "DailyLog Sub-Domain" as DailyLogSubDomain <<Rectangle>> #LightGray {
+
+            note "Invariant: [When a workout or meal is either added, updated, or deleted, \n the changes will also reflect in the relevant daily log]" as dailyLogInvariant
+            AGGREGATE_ROOT(DailyLog) #lightBlue{
+                calendarDate: LocalDate
+                breakfast: String
+                lunch: String
+                dinner: String
+                snacks: String
+                metCaloriesGoal: GoalStatus
+                metWorkoutGoal: GoalStatus
+                metDailyGoals: GoalStatus
+
+            }
+
+            VALUE_OBJECT(DailyLogIdentifier) #Bisque{
+                DailyLogId: UUID
+            }
+
+            ENUM(GoalStatus){
+                ACHIEVED
+                MISSED
+                IN_PROGRESS
+                NONE
+            }
+
+            DailyLog --> DailyLogIdentifier
+            DailyLog --> MealIdentifier
+            DailyLog --> WorkoutIdentifier
+            DailyLog --> UserIdentifier
+            DailyLog --> GoalStatus
+        }
+
+    Package "Gym Sub-Domain" as Gym <<Rectangle>> #deb887 {
+            ENTITY(GYM) #lightPink{
+                gymName: String
+                location: GymLocation
+                userId: UserIdentifier
+
+            }
+
+            VALUE_OBJECT(GymIdentifier) #Bisque{
+                GymId: UUID
+            }
+
+            VALUE_OBJECT(GymLocation) #Bisque{
+                address: String
+                street: String
+                city: String
+                zipCode: String
+            }
+
+            GYM"1" --> UserIdentifier
+            GYM --> GymIdentifier
+            GYM --> GymLocation
+
+        }
+
+    Package "Trainer Sub-Domain" as Trainer <<Rectangle>> #f96161 {
+                ENTITY(TRAINER) #lightPink{
+                    trainerName: String
+                    expertise: String
+                    gymId: GymIdentifier
+                    userId: UserIdentifier
+                }
+
+                VALUE_OBJECT(TrainerIdentifier) #Bisque{
+                    TrainerId: UUID
+                }
+
+                TRAINER --> TrainerIdentifier
+                TRAINER"1" --> UserIdentifier
+            }
+}
+@enduml

@@ -3,6 +3,7 @@ package com.fitnesstracker.workouts.presentationlayer;
 
 import com.fitnesstracker.workouts.businesslayer.WorkoutService;
 import com.fitnesstracker.workouts.utils.exceptions.NotFoundException;
+import com.fitnesstracker.workouts.utils.exceptions.InvalidInputException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +28,11 @@ public class WorkoutController {
     @GetMapping("/{workoutId}")
     public ResponseEntity<WorkoutResponseModel> getWorkout(@PathVariable String workoutId) {
         if (workoutId.length() != UUID_LENGTH) {
-            throw new NotFoundException("Invalid workoutId provided: " + workoutId);
+            throw new InvalidInputException("Invalid workoutId provided: " + workoutId);
+        }
+        WorkoutResponseModel workout = workoutService.getWorkoutByWorkoutId(workoutId);
+        if (workout == null && workoutId.length() == UUID_LENGTH) {
+            throw new NotFoundException("Meal not found: " + workoutId);
         }
         return ResponseEntity.ok().body(workoutService.getWorkoutByWorkoutId(workoutId));
     }
@@ -40,7 +45,11 @@ public class WorkoutController {
     @PutMapping("/{workoutId}")
     public ResponseEntity<WorkoutResponseModel> updateWorkout(@RequestBody WorkoutRequestModel workoutRequestModel, @PathVariable String workoutId) {
         if (workoutId.length() != UUID_LENGTH) {
-            throw new NotFoundException("Invalid workoutId provided: " + workoutId);
+            throw new InvalidInputException("Invalid workoutId provided: " + workoutId);
+        }
+        WorkoutResponseModel workout = workoutService.getWorkoutByWorkoutId(workoutId);
+        if (workout == null && workoutId.length() == UUID_LENGTH) {
+            throw new NotFoundException("Meal not found: " + workoutId);
         }
         return ResponseEntity.created(null).body(workoutService.updateWorkout(workoutRequestModel, workoutId));
     }
@@ -48,7 +57,11 @@ public class WorkoutController {
     @DeleteMapping("/{workoutId}")
     public ResponseEntity<Void> deleteWorkout(@PathVariable String workoutId) {
         if (workoutId.length() != UUID_LENGTH) {
-            throw new NotFoundException("Invalid workoutId provided: " + workoutId);
+            throw new InvalidInputException("Invalid workoutId provided: " + workoutId);
+        }
+        WorkoutResponseModel workout = workoutService.getWorkoutByWorkoutId(workoutId);
+        if (workout == null && workoutId.length() == UUID_LENGTH) {
+            throw new NotFoundException("Meal not found: " + workoutId);
         }
         workoutService.deleteWorkout(workoutId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

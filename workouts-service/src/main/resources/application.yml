@@ -44,8 +44,8 @@ spring:
     init:
       platform: h2
       mode: always
-      schema-locations: classpath:schema.sql
-      data-locations: classpath:data.sql
+      schema-locations: classpath:schema-sql.sql
+      data-locations: classpath:data-sql.sql
 
 ---
 
@@ -69,8 +69,8 @@ spring:
     init:
       platform: mysql
       mode: always
-      schema-locations: classpath:schema.sql
-      data-locations: classpath:data.sql
+      schema-locations: classpath:schema-sql.sql
+      data-locations: classpath:data-sql.sql
 
 server.port: 8081
 

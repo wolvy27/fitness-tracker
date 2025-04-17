@@ -1,3 +1,4 @@
+DELETE FROM users;
 -- Users Table
 INSERT INTO users (user_id, first_name, last_name, age, height_in_cm, weight_in_kg, goal_description, daily_caloric_intake)
 VALUES
@@ -12,6 +13,7 @@ VALUES
     ('3b9ef1d2-c6a8-47e5-85b0-df63b3951497', 'Isabella', 'Moore', 29, 168, 62, 'Train for marathon', 2300),
     ('5ae0f247-3d9b-4e58-ba3c-2f8d72ad32c1', 'Jack', 'Walker', 35, 176, 78, 'General fitness', 2400);
 
+DELETE FROM user_workout_days;
 -- User Workout Days Table
 INSERT INTO user_workout_days (user_id, workout_day)
 VALUES

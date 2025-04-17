@@ -1,9 +1,5 @@
 package com.fitnesstracker.workouts.businesslayer;
 
-
-
-
-
 import com.fitnesstracker.workouts.presentationlayer.WorkoutRequestModel;
 import com.fitnesstracker.workouts.presentationlayer.WorkoutResponseModel;
 

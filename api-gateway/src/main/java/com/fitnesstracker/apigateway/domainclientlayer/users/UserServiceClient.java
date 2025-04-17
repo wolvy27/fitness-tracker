@@ -1,11 +1,15 @@
 package com.fitnesstracker.apigateway.domainclientlayer.users;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fitnesstracker.apigateway.presentationlayer.users.UserRequestModel;
 import com.fitnesstracker.apigateway.presentationlayer.users.UserResponseModel;
 import com.fitnesstracker.apigateway.utils.exceptions.InvalidInputException;
 import com.fitnesstracker.apigateway.utils.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -52,6 +56,39 @@ public class UserServiceClient {
             log.debug("Getting users");
             UserResponseModel[] userResponseModels = restTemplate.getForObject(url, UserResponseModel[].class);
             return Arrays.asList(userResponseModels);
+        } catch (HttpClientErrorException ex) {
+            throw handleHttpClientException(ex);
+        }
+    }
+
+    public UserResponseModel addUser(UserRequestModel userRequestModel) {
+        try {
+            String url = USER_SERVICE_URL;
+            log.debug("Adding user: {}", userRequestModel);
+            UserResponseModel userResponseModel = restTemplate.postForObject(url, userRequestModel, UserResponseModel.class);
+            return userResponseModel;
+        } catch (HttpClientErrorException ex) {
+            throw handleHttpClientException(ex);
+        }
+    }
+
+    public UserResponseModel updateUser(UserRequestModel userRequestModel, String userId) {
+        try {
+            String url = USER_SERVICE_URL + "/" + userId;
+            log.debug("Updating user: {}", userRequestModel);
+            HttpEntity<UserRequestModel> requestEntity = new HttpEntity<>(userRequestModel);
+            UserResponseModel userResponseModel = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, new ParameterizedTypeReference<UserResponseModel>(){}).getBody();
+            return userResponseModel;
+        } catch (HttpClientErrorException ex) {
+            throw handleHttpClientException(ex);
+        }
+    }
+
+    public void deleteUser(String userId) {
+        try {
+            String url = USER_SERVICE_URL + "/" + userId;
+            log.debug("Deleting user: {}", userId);
+            restTemplate.delete(url);
         } catch (HttpClientErrorException ex) {
             throw handleHttpClientException(ex);
         }

@@ -1,26 +1,33 @@
 @startuml C4_Level2_FitnessTracker
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
 
-Person(user, "Fitness App User", "Tracks their fitness via the application")
+Person(user, "Fitness App User", "Tracks workouts, meals, and progress")
 
-System_Boundary(fitnessApp, "FitnessTracker") {
-    Container(webApp, "Spring Boot REST API", "Java (Spring)", "Handles all business logic and HTTP requests")
-    Container(db, "MySQL Database", "Relational Database", "Stores user, workout, meal, and log info")
+System_Boundary(fitnessSystem, "Fitness Tracker System") {
+    Container(apiGateway, "API Gateway", "Spring Cloud Gateway", "Routes requests to appropriate services")
 
-    Container(userController, "User Subdomain", "REST Controller", "Handles user operations")
-    Container(workoutController, "Workout Subdomain", "REST Controller", "Handles workouts")
-    Container(mealController, "Meal Subdomain", "REST Controller", "Handles meal logging")
-    Container(dailyLogController, "Daily Log Subdomain", "REST Controller", "Handles daily logs")
+    Container(userService, "User Service", "Spring Boot", "Manages user profiles and goals")
+    ContainerDb(userDb, "User Database", "MySQL", "Stores user data")
+
+    Container(workoutService, "Workout Service", "Spring Boot", "Manages workout data")
+    ContainerDb(workoutDb, "Workout Database", "MySQL", "Stores workout records")
+
+    Container(mealService, "Meal Service", "Spring Boot", "Manages meal logging")
+    ContainerDb(mealDb, "Meal Database", "PostgreSQL", "Stores meal records")
 }
 
-Rel(user, webApp, "Sends HTTP requests", "JSON/HTTPS")
-Rel(webApp, db, "Reads/Writes")
+' External interactions
+Rel(user, apiGateway, "Uses", "HTTPS/JSON")
 
-Rel(webApp, userController, "Uses")
-Rel(webApp, workoutController, "Uses")
-Rel(webApp, mealController, "Uses")
-Rel(webApp, dailyLogController, "Uses")
+' API Gateway to services
+Rel(apiGateway, userService, "Routes to", "HTTP")
+Rel(apiGateway, workoutService, "Routes to", "HTTP")
+Rel(apiGateway, mealService, "Routes to", "HTTP")
 
+' Services to their databases
+Rel(userService, userDb, "Reads/Writes", "JDBC")
+Rel(workoutService, workoutDb, "Reads/Writes", "JDBC")
+Rel(mealService, mealDb, "Reads/Writes", "JDBC")
 
 
 @enduml
