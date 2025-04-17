@@ -20,9 +20,9 @@ System_Boundary(fitnessSystem, "Fitness Tracker System") {
 Rel(user, apiGateway, "Uses", "HTTPS/JSON")
 
 ' API Gateway to services
-Rel(apiGateway, userService, "Routes to", "HTTP")
-Rel(apiGateway, workoutService, "Routes to", "HTTP")
-Rel(apiGateway, mealService, "Routes to", "HTTP")
+Rel(apiGateway, userService, "Routes to", "HTTPS/JSON")
+Rel(apiGateway, workoutService, "Routes to", "HTTPS/JSON")
+Rel(apiGateway, mealService, "Routes to", "HTTPS/JSON")
 
 ' Services to their databases
 Rel(userService, userDb, "Reads/Writes", "JDBC")

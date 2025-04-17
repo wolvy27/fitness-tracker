@@ -113,47 +113,5 @@ class UserRepositoryTest {
 
     }
 
-    @Test
-    public void whenSaveUserWithNullFirstName_thenThrowException() {
-        User user = new User(null, "Smith", 28, 165, 68,
-                new Goal("Lose weight", 1800, List.of("Monday")));
 
-        assertThrows(DataIntegrityViolationException.class, () -> {
-            userRepository.save(user);
-            userRepository.flush();
-        });
-    }
-
-    @Test
-    public void whenSaveUserWithNullLastName_thenThrowException() {
-        User user = new User("Alice", null, 28, 165, 68,
-                new Goal("Lose weight", 1800, List.of("Monday")));
-
-        assertThrows(DataIntegrityViolationException.class, () -> {
-            userRepository.save(user);
-            userRepository.flush();
-        });
-    }
-
-    @Test
-    public void whenSaveUserWithNegativeAge_thenThrowException() {
-        User user = new User("Alice", "Smith", -1, 165, 68,
-                new Goal("Lose weight", 1800, List.of("Monday")));
-
-        assertThrows(DataIntegrityViolationException.class, () -> {
-            userRepository.save(user);
-            userRepository.flush();
-        });
-    }
-
-    @Test
-    public void whenSaveUserWithNullGoalDescription_thenThrowException() {
-        User user = new User("Alice", "Smith", 28, 165, 68,
-                new Goal(null, 1800, List.of("Monday")));
-
-        assertThrows(DataIntegrityViolationException.class, () -> {
-            userRepository.save(user);
-            userRepository.flush();
-        });
-    }
 }

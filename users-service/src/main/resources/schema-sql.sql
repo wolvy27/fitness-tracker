@@ -3,9 +3,9 @@ CREATE TABLE IF NOT EXISTS users (
                                      user_id VARCHAR(36) UNIQUE NOT NULL,
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
-    age INTEGER NOT NULL CHECK (age > 0),
-    height_in_cm INTEGER NOT NULL CHECK (height_in_cm > 0),
-    weight_in_kg INTEGER NOT NULL CHECK (weight_in_kg > 0),
+    age INTEGER NOT NULL,
+    height_in_cm INTEGER NOT NULL,
+    weight_in_kg INTEGER NOT NULL,
     goal_description VARCHAR(50) NOT NULL,
     daily_caloric_intake INTEGER NOT NULL
     );

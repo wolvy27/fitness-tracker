@@ -209,10 +209,10 @@ public class MealControllerTest {
     }
 
     // Additional Tests
+    // Positive
 
     @Test
     public void whenAddMealWithValidCalories_thenMealIsCreated() {
-        // Given
         MealRequestModel newMeal = new MealRequestModel(
                 "Valid Calories",
                 800,
@@ -233,7 +233,6 @@ public class MealControllerTest {
 
     @Test
     public void whenUpdateMealWithValidCalories_thenMealIsUpdated() {
-        // Given
         MealRequestModel updatedMeal = new MealRequestModel(
                 "Updated Calories",
                 900,
@@ -241,7 +240,6 @@ public class MealControllerTest {
                 MealType.SNACK
         );
 
-        // When & Then
         webTestClient.put()
                 .uri(BASE_URL + "/{mealId}", VALID_MEAL_ID)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -252,9 +250,10 @@ public class MealControllerTest {
                 .value(meal -> assertEquals(900, meal.getCalories()));
     }
 
+    // Negative
+
     @Test
-    public void whenAddMealWithInvalidCalories_thenReturnBadRequest() {  // Or appropriate status
-        // Given
+    public void whenAddMealWithInvalidCalories_thenReturnBadRequest() {
         MealRequestModel newMeal = new MealRequestModel(
                 "Invalid Calories",
                 -100,
@@ -262,20 +261,16 @@ public class MealControllerTest {
                 MealType.DINNER
         );
 
-        // When & Then
         webTestClient.post()
                 .uri(BASE_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(newMeal)
                 .exchange()
-                .expectStatus().isBadRequest();  // Or appropriate status
-        //.expectBody()
-        //.jsonPath("$.message").isEqualTo("Calories cannot be negative"); //Adapt the message as needed
+                .expectStatus().isBadRequest();
     }
 
     @Test
-    public void whenUpdateMealWithInvalidCalories_thenReturnBadRequest() { // Or appropriate status
-        // Given
+    public void whenUpdateMealWithInvalidCalories_thenReturnBadRequest() {
         MealRequestModel updatedMeal = new MealRequestModel(
                 "Invalid Update Calories",
                 -200,
@@ -283,12 +278,11 @@ public class MealControllerTest {
                 MealType.LUNCH
         );
 
-        // When & Then
         webTestClient.put()
                 .uri(BASE_URL + "/{mealId}", VALID_MEAL_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(updatedMeal)
                 .exchange()
-                .expectStatus().isBadRequest();   // Or appropriate status
+                .expectStatus().isBadRequest();
     }
 }
