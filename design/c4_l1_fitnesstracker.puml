@@ -5,9 +5,13 @@ Person(user, "Fitness App User", "A user tracking their fitness progress")
 
 System(fitnessApp, "FitnessTracker", "Allows users to log meals, workouts, and daily goals")
 
-System_Ext(database, "H2 Database", "Stores user, workout, meal, and log data")
+System_Ext(mysqlDb, "MySQL Databases", "Stores user and workout data")
+System_Ext(postgresDb, "PostgreSQL Database", "Stores meal data")
+System_Ext(h2Db, "H2 Database", "Development/test database")
 
 Rel(user, fitnessApp, "Uses")
-Rel(fitnessApp, database, "Reads/Writes data to")
+Rel(fitnessApp, mysqlDb, "Reads/Writes user data")
+Rel(fitnessApp, postgresDb, "Reads/Writes meal data")
+Rel(fitnessApp, h2Db, "Uses for testing")
 
 @enduml
