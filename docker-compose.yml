@@ -111,3 +111,41 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+
+  # PhpMyAdmin - Users
+  phpmyadmin-users:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - "8180:80"
+    environment:
+      - PMA_HOST=mysql-users
+      - PMA_USER=user
+      - PMA_PASSWORD=pwd
+    depends_on:
+      - mysql-users
+
+  # PhpMyAdmin - Workouts
+  phpmyadmin-workouts:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - "8181:80"
+    environment:
+      - PMA_HOST=mysql-workouts
+      - PMA_USER=user
+      - PMA_PASSWORD=pwd
+    depends_on:
+      - mysql-workouts
+
+  # PgAdmin - Meals
+  pgadmin-meals:
+    image: dpage/pgadmin4
+    ports:
+      - "8182:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@example.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    volumes:
+      - ./data/pgadmin:/var/lib/pgadmin
+    depends_on:
+      - postgres-meals
