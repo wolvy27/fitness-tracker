@@ -154,14 +154,17 @@ public class DailyLogServiceImpl implements DailyLogService {
             }
 
             // Set calorie goal status
+            int lowerBound = (int) Math.floor(userCaloriesGoal * 0.9);
+            int upperBound = (int) Math.ceil(userCaloriesGoal * 1.1);
+
             if (dailyLog.getLogDate().equals(LocalDate.now())) {
                 responseModel.setMetCaloriesGoal(GoalStatus.IN_PROGRESS);
-            } else if ((totalCaloriesConsumed > userCaloriesGoal + (userCaloriesGoal * 0.10)) ||
-                    (totalCaloriesConsumed < userCaloriesGoal - (userCaloriesGoal * 0.10))) {
+            } else if (totalCaloriesConsumed >= lowerBound && totalCaloriesConsumed <= upperBound) {
                 responseModel.setMetCaloriesGoal(GoalStatus.ACHIEVED);
             } else {
                 responseModel.setMetCaloriesGoal(GoalStatus.MISSED);
             }
+
 
             // Ensure meal calorie fields are never null in response
             responseModel.setBreakfastCalories(breakfast.getMealCalorie() != null ? breakfast.getMealCalorie() : 0);
@@ -184,6 +187,7 @@ public class DailyLogServiceImpl implements DailyLogService {
         if (dailyLog == null) {
             throw new InvalidInputException("DailyLog with id " + dailyLogId + " not found for user " + userId);
         }
+        int userCaloriesGoal = usersServiceClient.getDailyCalorieIntake(userId);
 
         // Map DailyLog to Response Model
         DailyLogResponseModel responseModel = dailyLogResponseMapper.entityToResponseModel(dailyLog);
@@ -259,11 +263,12 @@ public class DailyLogServiceImpl implements DailyLogService {
         }
 
         // Set calorie goal status
-        int userCaloriesGoal = usersServiceClient.getDailyCalorieIntake(userId);
+        int lowerBound = (int) Math.floor(userCaloriesGoal * 0.9);
+        int upperBound = (int) Math.ceil(userCaloriesGoal * 1.1);
+
         if (dailyLog.getLogDate().equals(LocalDate.now())) {
             responseModel.setMetCaloriesGoal(GoalStatus.IN_PROGRESS);
-        } else if ((totalCaloriesConsumed > userCaloriesGoal + (userCaloriesGoal * 0.10)) ||
-                (totalCaloriesConsumed < userCaloriesGoal - (userCaloriesGoal * 0.10))) {
+        } else if (totalCaloriesConsumed >= lowerBound && totalCaloriesConsumed <= upperBound) {
             responseModel.setMetCaloriesGoal(GoalStatus.ACHIEVED);
         } else {
             responseModel.setMetCaloriesGoal(GoalStatus.MISSED);
@@ -399,11 +404,12 @@ public class DailyLogServiceImpl implements DailyLogService {
         if (dailyLog.getLogDate().equals(LocalDate.now())) {
             dailyLog.setMetCaloriesGoal(GoalStatus.IN_PROGRESS);
         } else {
-            double lowerBound = userCaloriesGoal * 0.9;
-            double upperBound = userCaloriesGoal * 1.1;
+            int lowerBound = (int) Math.floor(userCaloriesGoal * 0.9);
+            int upperBound = (int) Math.ceil(userCaloriesGoal * 1.1);
             dailyLog.setMetCaloriesGoal((totalCaloriesConsumed >= lowerBound && totalCaloriesConsumed <= upperBound) ?
                     GoalStatus.ACHIEVED : GoalStatus.MISSED);
         }
+
 
         // Calculate daily goals status
         if (dailyLog.getMetCaloriesGoal() == GoalStatus.ACHIEVED &&
@@ -576,11 +582,12 @@ public class DailyLogServiceImpl implements DailyLogService {
         if (existingDailyLog.getLogDate().equals(LocalDate.now())) {
             existingDailyLog.setMetCaloriesGoal(GoalStatus.IN_PROGRESS);
         } else {
-            double lowerBound = userCaloriesGoal * 0.9;
-            double upperBound = userCaloriesGoal * 1.1;
+            int lowerBound = (int) Math.floor(userCaloriesGoal * 0.9);
+            int upperBound = (int) Math.ceil(userCaloriesGoal * 1.1);
             existingDailyLog.setMetCaloriesGoal((totalCaloriesConsumed >= lowerBound && totalCaloriesConsumed <= upperBound) ?
                     GoalStatus.ACHIEVED : GoalStatus.MISSED);
         }
+
 
         // Calculate daily goals status
         if (existingDailyLog.getMetCaloriesGoal() == GoalStatus.ACHIEVED &&

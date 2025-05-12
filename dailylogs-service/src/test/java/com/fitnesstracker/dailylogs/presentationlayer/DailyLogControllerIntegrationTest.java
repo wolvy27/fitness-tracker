@@ -369,4 +369,17 @@ class DailyLogControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isNotFound();
     }
+
+    @Test
+    public void whenInvalidDateFormat_thenReturnBadRequest() throws Exception {
+        // Act & Assert
+        webTestClient.post()
+                .uri("/api/v1/" + FOUND_USER_ID + "/dailyLogs")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue("{\"logDate\": \"2025/03/17\"}") // Invalid format
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+
+
 }

@@ -44,6 +44,13 @@ public class DailyLogController {
         if (userId.length() != UUID_LENGTH) {
             throw new InvalidInputException("Invalid userId provided: " + userId);
         }
+        if (requestModel == null) {
+            throw new InvalidInputException("Request body cannot be null");
+        }
+        if (requestModel.getLogDate() == null) {
+            throw new InvalidInputException("Log date is required");
+        }
+
         return ResponseEntity.created(null).body(dailyLogService.addDailyLog(requestModel, userId));
     }
 

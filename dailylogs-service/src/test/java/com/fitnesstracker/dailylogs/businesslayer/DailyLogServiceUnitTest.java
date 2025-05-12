@@ -480,4 +480,211 @@ class DailyLogServiceUnitTest {
         verify(dailyLogRepository).findDailyLogByDailyLogIdentifier_DailyLogIdAndUserModel_userId(dailyLogId, userId);
         verifyNoMoreInteractions(dailyLogRepository);
     }
+
+    @Test
+    public void whenLogDateIsToday_thenSetInProgressStatus() {
+        // Arrange
+        DailyLog todayLog = dailyLog.toBuilder()
+                .logDate(LocalDate.now())
+                .metCaloriesGoal(null)
+                .metWorkoutGoal(null)
+                .build();
+
+        when(dailyLogRepository.findAllByUserModel_userId(userId)).thenReturn(List.of(todayLog));
+        when(usersServiceClient.getUserByUserId(userId)).thenReturn(userModel);
+        when(usersServiceClient.getDailyCalorieIntake(userId)).thenReturn(2000);
+        when(usersServiceClient.getWorkoutDays(userId)).thenReturn(List.of("MONDAY"));
+
+        // Act
+        List<DailyLogResponseModel> result = dailyLogService.getDailyLogs(userId);
+
+        // Assert
+        assertEquals(GoalStatus.IN_PROGRESS, result.get(0).getMetCaloriesGoal());
+        assertEquals(GoalStatus.IN_PROGRESS, result.get(0).getMetWorkoutGoal());
+    }
+
+    @Test
+    public void whenWorkoutDayMatchesButNoWorkout_thenSetMissedStatus() {
+        // Arrange
+        DailyLog missedWorkoutLog = dailyLog.toBuilder()
+                .workoutModel(null)
+                .logDate(LocalDate.of(2025, 3, 10)) // Monday
+                .build();
+
+        when(dailyLogRepository.findAllByUserModel_userId(userId)).thenReturn(List.of(missedWorkoutLog));
+        when(usersServiceClient.getUserByUserId(userId)).thenReturn(userModel);
+        when(usersServiceClient.getDailyCalorieIntake(userId)).thenReturn(2000);
+        when(usersServiceClient.getWorkoutDays(userId)).thenReturn(List.of("MONDAY"));
+
+        // Act
+        List<DailyLogResponseModel> result = dailyLogService.getDailyLogs(userId);
+
+        // Assert
+        assertEquals(GoalStatus.MISSED, result.get(0).getMetWorkoutGoal());
+    }
+
+    @Test
+    public void whenTotalCaloriesMeetCaloriesGoal_thenSetAchievedStatus() {
+        // Arrange
+        int calorieGoal = 2000;
+        DailyLog boundsLog = dailyLog.toBuilder()
+                .breakfast(breakfastModel.toBuilder().mealCalorie(700).build())
+                .lunch(lunchModel.toBuilder().mealCalorie(700).build())
+                .dinner(dinnerModel.toBuilder().mealCalorie(600).build())
+                .logDate(LocalDate.of(2025, 3, 9)) // Not today
+                .build();
+
+        when(dailyLogRepository.findAllByUserModel_userId(userId)).thenReturn(List.of(boundsLog));
+        when(usersServiceClient.getUserByUserId(userId)).thenReturn(userModel);
+        when(usersServiceClient.getDailyCalorieIntake(userId)).thenReturn(calorieGoal);
+        when(usersServiceClient.getWorkoutDays(userId)).thenReturn(Collections.emptyList());
+
+        // Act
+        List<DailyLogResponseModel> result = dailyLogService.getDailyLogs(userId);
+
+        // Assert (1800-2200 range for 2000 goal)
+        assertEquals(2000, result.get(0).getBreakfastCalories() + result.get(0).getLunchCalories() + result.get(0).getDinnerCalories());
+        assertEquals(GoalStatus.ACHIEVED, result.get(0).getMetCaloriesGoal());
+    }
+
+    @Test
+    public void whenNullMealCalories_thenCalculateAsZero() {
+        // Arrange
+        DailyLog nullCalorieLog = dailyLog.toBuilder()
+                .breakfast(breakfastModel.toBuilder().mealCalorie(null).build())
+                .lunch(lunchModel.toBuilder().mealCalorie(null).build())
+                .dinner(dinnerModel.toBuilder().mealCalorie(null).build())
+                .snacks(List.of(snackModel.toBuilder().mealCalorie(null).build()))
+                .build();
+
+        when(dailyLogRepository.findAllByUserModel_userId(userId)).thenReturn(List.of(nullCalorieLog));
+        when(usersServiceClient.getUserByUserId(userId)).thenReturn(userModel);
+        when(usersServiceClient.getDailyCalorieIntake(userId)).thenReturn(2000);
+
+        // Act
+        List<DailyLogResponseModel> result = dailyLogService.getDailyLogs(userId);
+
+        // Assert
+        assertEquals(0, result.get(0).getBreakfastCalories());
+        assertEquals(0, result.get(0).getLunchCalories());
+        assertEquals(0, result.get(0).getDinnerCalories());
+    }
+
+    @Test
+    public void whenEmptySnacksList_thenHandleGracefully() {
+        // Arrange
+        DailyLog emptySnacksLog = dailyLog.toBuilder()
+                .snacks(Collections.emptyList())
+                .build();
+
+        when(dailyLogRepository.findAllByUserModel_userId(userId)).thenReturn(List.of(emptySnacksLog));
+        when(usersServiceClient.getUserByUserId(userId)).thenReturn(userModel);
+
+        // Act
+        List<DailyLogResponseModel> result = dailyLogService.getDailyLogs(userId);
+
+        // Assert
+        assertNotNull(result.get(0).getSnacksIdentifier());
+        assertTrue(result.get(0).getSnacksIdentifier().isEmpty());
+    }
+
+    @Test
+    public void whenUpdateWithInvalidMealId_thenThrowException() {
+        // Arrange
+        String invalidMealId = "invalid-meal-id";
+        DailyLogRequestModel invalidRequest = requestModel.toBuilder()
+                .breakfastIdentifier(invalidMealId)
+                .build();
+
+        when(usersServiceClient.getUserByUserId(userId)).thenReturn(userModel);
+        when(dailyLogRepository.findDailyLogByDailyLogIdentifier_DailyLogIdAndUserModel_userId(dailyLogId, userId))
+                .thenReturn(dailyLog);
+        when(mealsServiceClient.getMealByMealId(invalidMealId)).thenReturn(null);
+
+        // Act & Assert
+        assertThrows(InvalidInputException.class, () -> {
+            dailyLogService.updateDailyLog(invalidRequest, dailyLogId, userId);
+        });
+    }
+
+    @Test
+    public void whenAddDailyLogWithNullRequest_thenThrowException() {
+        // Act & Assert
+        assertThrows(InvalidInputException.class, () -> {
+            dailyLogService.addDailyLog(null, userId);
+        });
+    }
+
+    @Test
+    public void whenAllMealsEmpty_thenReturnZeroCalories() {
+        // Arrange
+        DailyLog emptyMealsLog = DailyLog.builder()
+                .id("empty-meals-log")
+                .userModel(userModel)
+                .dailyLogIdentifier(new DailyLogIdentifier("empty-meals-log"))
+                .breakfast(null)
+                .lunch(null)
+                .dinner(null)
+                .snacks(Collections.emptyList())
+                .logDate(LocalDate.of(2025, 3, 10))
+                .build();
+
+        when(dailyLogRepository.findAllByUserModel_userId(userId)).thenReturn(List.of(emptyMealsLog));
+        when(usersServiceClient.getUserByUserId(userId)).thenReturn(userModel);
+        when(usersServiceClient.getDailyCalorieIntake(userId)).thenReturn(2000);
+
+        // Act
+        List<DailyLogResponseModel> result = dailyLogService.getDailyLogs(userId);
+
+        // Assert - Calculate total calories including snacks
+        int totalCalories = result.get(0).getBreakfastCalories() +
+                result.get(0).getLunchCalories() +
+                result.get(0).getDinnerCalories() +
+                result.get(0).getSnacksCalories().stream().mapToInt(Integer::intValue).sum();
+
+        assertEquals(0, totalCalories);
+        assertEquals(GoalStatus.MISSED, result.get(0).getMetCaloriesGoal());
+    }
+
+    @Test
+    public void whenMealsAndSnacksPresent_thenCalculateTotalCaloriesCorrectly() {
+        // Arrange
+        MealModel snack1 = MealModel.builder()
+                .mealId("snack1")
+                .mealName("Protein Bar")
+                .mealCalorie(200)
+                .build();
+
+        MealModel snack2 = MealModel.builder()
+                .mealId("snack2")
+                .mealName("Fruit")
+                .mealCalorie(100)
+                .build();
+
+        DailyLog logWithSnacks = DailyLog.builder()
+                .id("log-with-snacks")
+                .userModel(userModel)
+                .dailyLogIdentifier(new DailyLogIdentifier("log-with-snacks"))
+                .breakfast(breakfastModel) // 350 calories
+                .lunch(lunchModel)         // 450 calories
+                .dinner(dinnerModel)       // 700 calories
+                .snacks(List.of(snack1, snack2)) // 200 + 100 = 300 calories
+                .logDate(LocalDate.of(2025, 3, 10))
+                .build();
+
+        when(dailyLogRepository.findAllByUserModel_userId(userId)).thenReturn(List.of(logWithSnacks));
+        when(usersServiceClient.getUserByUserId(userId)).thenReturn(userModel);
+        when(usersServiceClient.getDailyCalorieIntake(userId)).thenReturn(2000);
+
+        // Act
+        List<DailyLogResponseModel> result = dailyLogService.getDailyLogs(userId);
+
+        // Assert
+        int totalCalories = result.get(0).getBreakfastCalories() +
+                result.get(0).getLunchCalories() +
+                result.get(0).getDinnerCalories() +
+                result.get(0).getSnacksCalories().stream().mapToInt(Integer::intValue).sum();
+
+        assertEquals(350 + 450 + 700 + 200 + 100, totalCalories);
+    }
 }

@@ -110,34 +110,69 @@ class DailyLogControllerUnitTest {
                 dailyLogController.getDailyLog(FOUND_USER_ID, INVALID_DAILYLOG_ID));
     }
 
-    // POST Tests
     @Test
-    public void whenAddDailyLog_thenReturnCreated() {
-        DailyLogRequestModel requestModel = createMockDailyLogRequest();
+    public void whenAddDailyLogWithValidData_thenReturnCreated() {
+        // Arrange
+        DailyLogRequestModel validRequest = DailyLogRequestModel.builder()
+                .logDate(LocalDate.now())  // Now satisfies validation
+                .build();
+
         DailyLogResponseModel mockResponse = createMockDailyLogResponse();
 
-        when(dailyLogService.addDailyLog(requestModel, FOUND_USER_ID))
+        when(dailyLogService.addDailyLog(validRequest, FOUND_USER_ID))
                 .thenReturn(mockResponse);
 
+        // Act
         ResponseEntity<DailyLogResponseModel> response =
-                dailyLogController.addDailyLog(FOUND_USER_ID, requestModel);
+                dailyLogController.addDailyLog(FOUND_USER_ID, validRequest);
 
+        // Assert
         assertNotNull(response);
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(mockResponse, response.getBody());
-        verify(dailyLogService, times(1))
-                .addDailyLog(requestModel, FOUND_USER_ID);
     }
-    /*
+
+    // Test 2: Original invalid userId test
     @Test
-    public void whenAddDailyLogWithInvalidData_thenThrowException() {
-        DailyLogRequestModel invalidRequest = new DailyLogRequestModel(); // Empty request
+    public void whenAddDailyLogWithInvalidUserId_thenThrowException() {
+        // Arrange
+        String invalidUserId = "short-id";
+        DailyLogRequestModel validRequest = DailyLogRequestModel.builder()
+                .logDate(LocalDate.now())
+                .build();
+
+        // Act & Assert
+        assertThrows(InvalidInputException.class, () ->
+                dailyLogController.addDailyLog(invalidUserId, validRequest));
+
+        verify(dailyLogService, never()).addDailyLog(any(), any());
+    }
+
+    // Test 3: New null request validation
+    @Test
+    public void whenAddDailyLogWithNullRequest_thenThrowException() {
+        assertThrows(InvalidInputException.class, () ->
+                dailyLogController.addDailyLog(FOUND_USER_ID, null));
+
+        verify(dailyLogService, never()).addDailyLog(any(), any());
+    }
+
+    @Test
+    public void whenAddDailyLogWithoutLogDate_thenThrowException() {
+        DailyLogRequestModel invalidRequest = DailyLogRequestModel.builder()
+                .workoutIdentifier(null)
+                .logDate(null)  // Explicitly set to null
+                .breakfastIdentifier(null)
+                .lunchIdentifier(null)
+                .dinnerIdentifier(null)
+                .snacksIdentifier(null)
+                .build();
 
         assertThrows(InvalidInputException.class, () ->
                 dailyLogController.addDailyLog(FOUND_USER_ID, invalidRequest));
-    }
 
-     */
+        verify(dailyLogService, never()).addDailyLog(any(), any());
+    }
 
     // PUT Tests
     @Test
@@ -214,5 +249,28 @@ class DailyLogControllerUnitTest {
                 .lunchCalories(600)
                 .dinnerCalories(700)
                 .build();
+    }
+
+    @Test
+    public void whenUpdateWithInvalidIds_thenThrowInvalidInputException() {
+        // Arrange
+        String invalidDailyLogId = "short-id";
+        DailyLogRequestModel request = createMockDailyLogRequest();
+
+        // Act & Assert
+        assertThrows(InvalidInputException.class, () -> {
+            dailyLogController.updateDailyLog(FOUND_USER_ID, invalidDailyLogId, request);
+        });
+    }
+
+    @Test
+    public void whenDeleteWithInvalidIds_thenThrowInvalidInputException() {
+        // Arrange
+        String invalidDailyLogId = "short-id";
+
+        // Act & Assert
+        assertThrows(InvalidInputException.class, () -> {
+            dailyLogController.deleteDailyLog(FOUND_USER_ID, invalidDailyLogId);
+        });
     }
 }
