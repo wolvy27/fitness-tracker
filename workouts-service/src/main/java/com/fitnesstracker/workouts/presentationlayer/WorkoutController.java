@@ -27,15 +27,27 @@ public class WorkoutController {
 
     @GetMapping("/{workoutId}")
     public ResponseEntity<WorkoutResponseModel> getWorkout(@PathVariable String workoutId) {
+        if ("None".equals(workoutId)) {
+            return ResponseEntity.ok(new WorkoutResponseModel(
+                    "None",                   // workoutId
+                    "",                       // workoutName
+                    null,                     // workoutType (can be null for empty workout)
+                    0,                        // durationInMinutes
+                    null                      // workoutDate (can be null)
+            ));
+        }
+
         if (workoutId.length() != UUID_LENGTH) {
             throw new InvalidInputException("Invalid workoutId provided: " + workoutId);
         }
+
         WorkoutResponseModel workout = workoutService.getWorkoutByWorkoutId(workoutId);
-        if (workout == null && workoutId.length() == UUID_LENGTH) {
-            throw new NotFoundException("Meal not found: " + workoutId);
+        if (workout == null) {
+            throw new NotFoundException("Workout not found: " + workoutId);
         }
-        return ResponseEntity.ok().body(workoutService.getWorkoutByWorkoutId(workoutId));
+        return ResponseEntity.ok(workout);
     }
+
 
     @PostMapping()
     public ResponseEntity<WorkoutResponseModel> addWorkout(@RequestBody WorkoutRequestModel workoutRequestModel) {
@@ -66,6 +78,23 @@ public class WorkoutController {
         workoutService.deleteWorkout(workoutId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
+
+    @GetMapping("/{workoutId}/workoutname")
+    public ResponseEntity<String> getWorkoutName(@PathVariable String workoutId) {
+        if (workoutId.length() != UUID_LENGTH) {
+            throw new InvalidInputException("Invalid workoutId provided: " + workoutId);
+        }
+        return ResponseEntity.ok().body(workoutService.getWorkoutNameByWorkoutId(workoutId));
+    }
+
+    @GetMapping("/{workoutId}/duration")
+    public ResponseEntity<Integer> getWorkoutDuration(@PathVariable String workoutId) {
+        if (workoutId.length() != UUID_LENGTH) {
+            throw new InvalidInputException("Invalid workoutId provided: " + workoutId);
+        }
+        return ResponseEntity.ok().body(workoutService.getDurationInMinutesByWorkoutId(workoutId));
+    }
+
 
 
 }

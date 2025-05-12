@@ -163,10 +163,10 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
 
-    /*
+
     @Override
-    public String getWorkoutNameByWorkoutId(String workoutId, String userId) {
-        Workout workout = workoutRepository.findWorkoutByWorkoutIdentifier_WorkoutIdAndUserIdentifier_UserId(workoutId, userId);
+    public String getWorkoutNameByWorkoutId(String workoutId) {
+        Workout workout = workoutRepository.findWorkoutByWorkoutIdentifier_WorkoutId(workoutId);
 
         if (workout == null) {
             throw new NotFoundException("WorkoutId not found: " + workoutId);
@@ -175,8 +175,8 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
     @Override
-    public Integer getDurationInMinutesByWorkoutId(String workoutId, String userId) {
-        Workout workout = workoutRepository.findWorkoutByWorkoutIdentifier_WorkoutIdAndUserIdentifier_UserId(workoutId, userId);
+    public Integer getDurationInMinutesByWorkoutId(String workoutId) {
+        Workout workout = workoutRepository.findWorkoutByWorkoutIdentifier_WorkoutId(workoutId);
 
         if (workout == null) {
             throw new NotFoundException("WorkoutId not found: " + workoutId);
@@ -184,7 +184,7 @@ public class WorkoutServiceImpl implements WorkoutService {
         return workout.getDurationInMinutes();
     }
 
-     */
+
 
 
 }

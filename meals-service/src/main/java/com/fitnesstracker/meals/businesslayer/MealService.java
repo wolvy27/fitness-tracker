@@ -14,7 +14,7 @@ public interface MealService {
     void deleteMeal(String mealId);
 
     // For DailyLog aggregate
-    //String getMealNameByMealId(String mealId, String userId);
-   // Integer getCaloriesByMealId(String mealId, String userId);
-    //MealType getMealTypeByMealId(String mealId);
+    String getMealNameByMealId(String mealId);
+    Integer getCaloriesByMealId(String mealId);
+    MealType getMealTypeByMealId(String mealId);
 }

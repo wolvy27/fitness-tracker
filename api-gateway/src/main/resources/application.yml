@@ -17,7 +17,7 @@ app:
   meals-service:
     host: localhost
     port: 8082
-  dailylog-service:
+  dailylogs-service:
     host: localhost
     port: 8083
 
@@ -42,5 +42,5 @@ app:
     host: meals-service
     port: 8082
   dailylogs-service:
-    host: dailylog-service
+    host: dailylogs-service
     port: 8083

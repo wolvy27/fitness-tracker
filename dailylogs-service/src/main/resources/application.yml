@@ -1,0 +1,81 @@
+server:
+  error:
+    include-message: always
+
+logging:
+  level:
+    root: INFO
+    com.kairns: DEBUG
+    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
+    org.mongodb.driver: DEBUG
+    org.springframework.data.mongodb.embedded: DEBUG
+
+
+---
+
+#for test
+spring:
+  config:
+    activate:
+      on-profile: test
+
+  data:
+    mongodb:
+      username: user
+      password: pwd
+      host: localhost
+      port: 0
+      database: sales-db
+      authentication-database: admin
+      auto-index-creation: true
+
+de:
+  flapdoodle:
+    mongodb:
+      embedded:
+        version: 5.0.5
+
+app:
+  users-service:
+    host: localhost
+    port: 8080
+  workouts-service:
+    host: localhost
+    port: 8081
+  meals-service:
+    host: localhost
+    port: 8082
+
+
+---
+
+# for docker
+
+spring:
+  config:
+    activate:
+      on-profile: docker
+
+
+  data:
+    mongodb:
+      username: user
+      password: pwd
+      host: mongodb
+      port: 27017
+      database: sales-db
+      authentication-database: admin
+      auto-index-creation: true
+
+server.port: 8083
+
+app:
+  users-service:
+    host: users-service
+    port: 8080
+  workouts-service:
+    host: workouts-service
+    port: 8081
+  meals-service:
+    host: meals-service
+    port: 8082

@@ -13,6 +13,6 @@ public interface WorkoutService {
     void deleteWorkout(String workoutId);
 
     // For DailyLog aggregate
-    //String getWorkoutNameByWorkoutId(String workoutId, String userId);
-    //Integer getDurationInMinutesByWorkoutId(String workoutId, String userId);
+    String getWorkoutNameByWorkoutId(String workoutId);
+    Integer getDurationInMinutesByWorkoutId(String workoutId);
 }

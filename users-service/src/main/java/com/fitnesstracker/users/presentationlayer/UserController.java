@@ -66,4 +66,37 @@ public class UserController {
         userService.deleteUser(userId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
+
+    @GetMapping("/{userId}/firstname")
+    public ResponseEntity<String> getUserFirstName(@PathVariable String userId) {
+        if (userId.length() != UUID_LENGTH) {
+            throw new InvalidInputException("Invalid userId provided: " + userId);
+        }
+        return ResponseEntity.ok().body(userService.getUserFirstNameById(userId));
+    }
+
+    @GetMapping("/{userId}/lastname")
+    public ResponseEntity<String> getUserLastName(@PathVariable String userId) {
+        if (userId.length() != UUID_LENGTH) {
+            throw new InvalidInputException("Invalid userId provided: " + userId);
+        }
+        return ResponseEntity.ok().body(userService.getUserLastNameById(userId));
+    }
+
+    @GetMapping("/{userId}/dailycalorieintake")
+    public ResponseEntity<Integer> getDailyCalorieIntake(@PathVariable String userId) {
+        if (userId.length() != UUID_LENGTH) {
+            throw new InvalidInputException("Invalid userId provided: " + userId);
+        }
+        return ResponseEntity.ok().body(userService.getDailyCalorieIntakeById(userId));
+    }
+
+    @GetMapping("/{userId}/workoutdays")
+    public ResponseEntity<List<String>> getWorkoutDays(@PathVariable String userId) {
+        if (userId.length() != UUID_LENGTH) {
+            throw new InvalidInputException("Invalid userId provided: " + userId);
+        }
+        return ResponseEntity.ok().body(userService.getWorkoutDaysById(userId));
+    }
+
 }

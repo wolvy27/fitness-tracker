@@ -26,15 +26,25 @@ public class MealController {
 
     @GetMapping("/{mealId}")
     public ResponseEntity<MealResponseModel> getMeal(@PathVariable String mealId) {
+        if ("None".equals(mealId)) {
+            return ResponseEntity.ok(new MealResponseModel(
+                    "None",                   // mealId
+                    "",                       // mealName
+                    0,                       // calories
+                    null,                     // mealDate
+                    null                      // mealType (can be null for empty meal)
+            ));
+        }
+
         if (mealId.length() != UUID_LENGTH) {
             throw new InvalidInputException("Invalid mealId provided: " + mealId);
         }
 
         MealResponseModel meal = mealService.getMealByMealId(mealId);
-        if (meal == null && mealId.length() == UUID_LENGTH) {
+        if (meal == null) {
             throw new NotFoundException("Meal not found: " + mealId);
         }
-        return ResponseEntity.ok().body(meal);
+        return ResponseEntity.ok(meal);
     }
 
     @PostMapping()
@@ -66,4 +76,21 @@ public class MealController {
         mealService.deleteMeal(mealId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
+
+    @GetMapping("/{mealId}/mealname")
+    public ResponseEntity<String> getMealName(@PathVariable String mealId) {
+        if (mealId.length() != UUID_LENGTH) {
+            throw new InvalidInputException("Invalid mealId provided: " + mealId);
+        }
+        return ResponseEntity.ok().body(mealService.getMealNameByMealId(mealId));
+    }
+
+    @GetMapping("/{mealId}/calories")
+    public ResponseEntity<Integer> getCalories(@PathVariable String mealId) {
+        if (mealId.length() != UUID_LENGTH) {
+            throw new InvalidInputException("Invalid mealId provided: " + mealId);
+        }
+        return ResponseEntity.ok().body(mealService.getCaloriesByMealId(mealId));
+    }
+
 }

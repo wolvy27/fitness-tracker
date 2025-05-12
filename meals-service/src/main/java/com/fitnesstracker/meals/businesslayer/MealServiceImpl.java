@@ -161,10 +161,10 @@ public class MealServiceImpl implements MealService {
          */
         Meal savedMeal = mealRepository.save(foundMeal);
     }
-    /*
+
     @Override
-    public String getMealNameByMealId(String mealId, String userId) {
-        Meal meal = mealRepository.findMealByMealIdentifier_MealIdAndUserIdentifier_UserId(mealId, userId);
+    public String getMealNameByMealId(String mealId) {
+        Meal meal = mealRepository.findMealByMealIdentifier_MealId(mealId);
 
         if (meal == null) {
             throw new NotFoundException("MealId not found: " + mealId);
@@ -174,8 +174,8 @@ public class MealServiceImpl implements MealService {
     }
 
     @Override
-    public Integer getCaloriesByMealId(String mealId, String userId) {
-        Meal meal = mealRepository.findMealByMealIdentifier_MealIdAndUserIdentifier_UserId(mealId, userId);
+    public Integer getCaloriesByMealId(String mealId) {
+        Meal meal = mealRepository.findMealByMealIdentifier_MealId(mealId);
 
         if (meal == null) {
             throw new NotFoundException("MealId not found: " + mealId);
@@ -187,8 +187,8 @@ public class MealServiceImpl implements MealService {
 
 
     @Override
-    public MealType getMealTypeByMealId(String mealId, String userId) {
-        Meal meal = mealRepository.findMealByMealIdentifier_MealIdAndUserIdentifier_UserId(mealId, userId);
+    public MealType getMealTypeByMealId(String mealId) {
+        Meal meal = mealRepository.findMealByMealIdentifier_MealId(mealId);
 
         if (meal == null) {
             throw new NotFoundException("MealId not found: " + mealId);
@@ -197,7 +197,7 @@ public class MealServiceImpl implements MealService {
         return meal.getMealType();
     }
 
-     */
+
 
 
 }
