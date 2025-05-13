@@ -14,6 +14,9 @@ System_Boundary(fitnessSystem, "Fitness Tracker System") {
 
     Container(mealService, "Meal Service", "Spring Boot", "Manages meal logging")
     ContainerDb(mealDb, "Meal Database", "PostgreSQL", "Stores meal records")
+
+    Container(dailylogService, "DailyLog Service", "Spring Boot", "Manages DailyLogs and aggregates user, meal, and workout")
+    ContainerDb(dailylogDb, "DailyLog Database", "MongoDB", "Stores DailyLogs")
 }
 
 ' External interactions
@@ -23,11 +26,13 @@ Rel(user, apiGateway, "Uses", "HTTPS/JSON")
 Rel(apiGateway, userService, "Routes to", "HTTPS/JSON")
 Rel(apiGateway, workoutService, "Routes to", "HTTPS/JSON")
 Rel(apiGateway, mealService, "Routes to", "HTTPS/JSON")
+Rel(apiGateway, dailylogService, "Routes to", "HTTPS/JSON")
 
 ' Services to their databases
 Rel(userService, userDb, "Reads/Writes", "JDBC")
 Rel(workoutService, workoutDb, "Reads/Writes", "JDBC")
 Rel(mealService, mealDb, "Reads/Writes", "JDBC")
+Rel(dailylogService, dailylogDb, "Reads/Writes", "Documents")
 
 
 @enduml

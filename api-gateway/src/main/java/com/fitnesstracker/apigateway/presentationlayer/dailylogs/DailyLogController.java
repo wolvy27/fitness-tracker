@@ -22,28 +22,16 @@ public class DailyLogController {
 
     @GetMapping()
     public ResponseEntity<List<DailyLogResponseModel>> getDailyLogs(@PathVariable String userId) {
-        if (userId.length() != UUID_LENGTH) {
-            throw new InvalidInputException("Invalid userId provided: " + userId);
-        }
         return ResponseEntity.ok(dailyLogService.getDailyLogs(userId));
     }
 
     @GetMapping("/{dailyLogId}")
     public ResponseEntity<DailyLogResponseModel> getDailyLog(@PathVariable String userId, @PathVariable String dailyLogId) {
-        if (userId.length() != UUID_LENGTH) {
-            throw new InvalidInputException("Invalid userId provided: " + userId);
-        }
-        if (dailyLogId.length() != UUID_LENGTH) {
-            throw new InvalidInputException("Invalid dailyLogId provided: " + dailyLogId);
-        }
         return ResponseEntity.ok(dailyLogService.getDailyLogByDailyLogId(dailyLogId, userId));
     }
 
     @PostMapping()
     public ResponseEntity<DailyLogResponseModel> addDailyLog(@PathVariable String userId, @RequestBody DailyLogRequestModel requestModel) {
-        if (userId.length() != UUID_LENGTH) {
-            throw new InvalidInputException("Invalid userId provided: " + userId);
-        }
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(dailyLogService.addDailyLog(requestModel, userId));
     }
@@ -51,23 +39,11 @@ public class DailyLogController {
     @PutMapping("/{dailyLogId}")
     public ResponseEntity<DailyLogResponseModel> updateDailyLog(@PathVariable String userId, @PathVariable String dailyLogId,
                                                                 @RequestBody DailyLogRequestModel requestModel) {
-        if (userId.length() != UUID_LENGTH) {
-            throw new InvalidInputException("Invalid userId provided: " + userId);
-        }
-        if (dailyLogId.length() != UUID_LENGTH) {
-            throw new InvalidInputException("Invalid dailyLogId provided: " + dailyLogId);
-        }
         return ResponseEntity.ok(dailyLogService.updateDailyLog(requestModel, dailyLogId, userId));
     }
 
     @DeleteMapping("/{dailyLogId}")
     public ResponseEntity<Void> deleteDailyLog(@PathVariable String userId, @PathVariable String dailyLogId) {
-        if (userId.length() != UUID_LENGTH) {
-            throw new InvalidInputException("Invalid userId provided: " + userId);
-        }
-        if (dailyLogId.length() != UUID_LENGTH) {
-            throw new InvalidInputException("Invalid dailyLogId provided: " + dailyLogId);
-        }
         dailyLogService.deleteDailyLog(dailyLogId, userId);
         return ResponseEntity.noContent().build();
     }

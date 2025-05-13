@@ -17,7 +17,7 @@ skinparam rectangle {
 }
 rectangle "Fitness Tracker Context" as BoundedContextFitnessTracker #line.dashed {
     Package "User Sub-Domain" as User <<Rectangle>> #LightGreen {
-        ENTITY(USER) #lightPink{
+        AGGREGATE_ROOT(USER) #lightPink{
             firstName: FirstName
             lastName: String
             age: int
@@ -90,8 +90,8 @@ rectangle "Fitness Tracker Context" as BoundedContextFitnessTracker #line.dashed
         }
     Package "DailyLog Sub-Domain" as DailyLogSubDomain <<Rectangle>> #LightGray {
 
-            note "Invariant: [When a workout or meal is either added, updated, or deleted, \n the changes will also reflect in the relevant daily log]" as dailyLogInvariant
-            AGGREGATE_ROOT(DailyLog) #lightBlue{
+            note "Invariant: [When a workout is added or the total calories consumed across all meals is recalculated, the goal status should be readjusted]" as dailyLogInvariant
+            AGGREGATE(DailyLog) #lightBlue{
                 calendarDate: LocalDate
                 breakfast: String
                 lunch: String

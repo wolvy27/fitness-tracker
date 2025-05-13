@@ -33,6 +33,8 @@ public class DailyLogController {
             throw new InvalidInputException("Invalid userId provided: " + userId);
         }
 
+        if (userId.length() == UUID_LENGTH) {}
+
         if (dailyLogId.length() != UUID_LENGTH) {
             throw new InvalidInputException("Invalid dailyLogId provided: " + dailyLogId);
         }

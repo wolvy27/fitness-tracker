@@ -13,7 +13,9 @@ import com.fitnesstracker.dailylogs.domainclientlayer.users.UserModel;
 import com.fitnesstracker.dailylogs.domainclientlayer.users.UsersServiceClient;
 import com.fitnesstracker.dailylogs.domainclientlayer.workouts.WorkoutModel;
 import com.fitnesstracker.dailylogs.domainclientlayer.workouts.WorkoutsServiceClient;
+import com.fitnesstracker.dailylogs.utils.exceptions.ExistingLogDateException;
 import com.fitnesstracker.dailylogs.utils.exceptions.InvalidInputException;
+import com.fitnesstracker.dailylogs.utils.exceptions.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import com.fitnesstracker.dailylogs.presentationlayer.DailyLogRequestModel;
@@ -72,7 +74,7 @@ public class DailyLogServiceImpl implements DailyLogService {
     public List<DailyLogResponseModel> getDailyLogs(String userId) {
         UserModel foundUser = usersServiceClient.getUserByUserId(userId);
         if (foundUser == null) {
-            throw new InvalidInputException("User not found");
+            throw new NotFoundException("User not found");
         }
 
         List<DailyLog> dailyLogs = dailyLogRepository.findAllByUserModel_userId(userId);
@@ -180,12 +182,12 @@ public class DailyLogServiceImpl implements DailyLogService {
     public DailyLogResponseModel getDailyLogByDailyLogId(String dailyLogId, String userId) {
         UserModel foundUser = usersServiceClient.getUserByUserId(userId);
         if (foundUser == null) {
-            throw new InvalidInputException("User not found");
+            throw new NotFoundException("User not found");
         }
 
         DailyLog dailyLog = dailyLogRepository.findDailyLogByDailyLogIdentifier_DailyLogIdAndUserModel_userId(dailyLogId, userId);
         if (dailyLog == null) {
-            throw new InvalidInputException("DailyLog with id " + dailyLogId + " not found for user " + userId);
+            throw new NotFoundException("DailyLog with id " + dailyLogId + " not found for user " + userId);
         }
         int userCaloriesGoal = usersServiceClient.getDailyCalorieIntake(userId);
 
@@ -287,7 +289,7 @@ public class DailyLogServiceImpl implements DailyLogService {
         // Validate user exists
         UserModel foundUser = usersServiceClient.getUserByUserId(userId);
         if (foundUser == null) {
-            throw new InvalidInputException("User with id " + userId + " not found");
+            throw new NotFoundException("User with id " + userId + " not found");
         }
 
         // Handle workout
@@ -295,7 +297,7 @@ public class DailyLogServiceImpl implements DailyLogService {
         if (newDailyLogData.getWorkoutIdentifier() != null && !newDailyLogData.getWorkoutIdentifier().equals("None")) {
             workout = workoutsServiceClient.getWorkoutByWorkoutId(newDailyLogData.getWorkoutIdentifier());
             if (workout == null) {
-                throw new InvalidInputException("Workout with id " + newDailyLogData.getWorkoutIdentifier() + " not found");
+                throw new NotFoundException("Workout with id " + newDailyLogData.getWorkoutIdentifier() + " not found");
             }
             if (workout.getWorkoutDurationInMinutes() == null) {
                 workout.setWorkoutDurationInMinutes(workoutsServiceClient.getWorkoutDuration(newDailyLogData.getWorkoutIdentifier()));
@@ -309,7 +311,7 @@ public class DailyLogServiceImpl implements DailyLogService {
         if (newDailyLogData.getBreakfastIdentifier() != null && !newDailyLogData.getBreakfastIdentifier().isEmpty()) {
             breakfast = mealsServiceClient.getMealByMealId(newDailyLogData.getBreakfastIdentifier());
             if (breakfast == null) {
-                throw new InvalidInputException("Breakfast meal with id " + newDailyLogData.getBreakfastIdentifier() + " not found");
+                throw new NotFoundException("Breakfast meal with id " + newDailyLogData.getBreakfastIdentifier() + " not found");
             }
             if (breakfast.getMealCalorie() == null) {
                 breakfast.setMealCalorie(mealsServiceClient.getCalories(newDailyLogData.getBreakfastIdentifier()));
@@ -323,7 +325,7 @@ public class DailyLogServiceImpl implements DailyLogService {
         if (newDailyLogData.getLunchIdentifier() != null && !newDailyLogData.getLunchIdentifier().isEmpty()) {
             lunch = mealsServiceClient.getMealByMealId(newDailyLogData.getLunchIdentifier());
             if (lunch == null) {
-                throw new InvalidInputException("Lunch meal with id " + newDailyLogData.getLunchIdentifier() + " not found");
+                throw new NotFoundException("Lunch meal with id " + newDailyLogData.getLunchIdentifier() + " not found");
             }
             if (lunch.getMealCalorie() == null) {
                 lunch.setMealCalorie(mealsServiceClient.getCalories(newDailyLogData.getLunchIdentifier()));
@@ -337,7 +339,7 @@ public class DailyLogServiceImpl implements DailyLogService {
                 !newDailyLogData.getDinnerIdentifier().equals("None")) {
             dinner = mealsServiceClient.getMealByMealId(newDailyLogData.getDinnerIdentifier());
             if (dinner == null) {
-                throw new InvalidInputException("Dinner meal with id " + newDailyLogData.getDinnerIdentifier() + " not found");
+                throw new NotFoundException("Dinner meal with id " + newDailyLogData.getDinnerIdentifier() + " not found");
             }
             if (dinner.getMealCalorie() == null) {
                 dinner.setMealCalorie(mealsServiceClient.getCalories(newDailyLogData.getDinnerIdentifier()));
@@ -353,7 +355,7 @@ public class DailyLogServiceImpl implements DailyLogService {
                 if (snackId != null && !snackId.isEmpty()) {
                     MealModel snack = mealsServiceClient.getMealByMealId(snackId);
                     if (snack == null) {
-                        throw new InvalidInputException("Snack meal with id " + snackId + " not found");
+                        throw new NotFoundException("Snack meal with id " + snackId + " not found");
                     }
                     if (snack.getMealCalorie() == null) {
                         snack.setMealCalorie(mealsServiceClient.getCalories(snackId));
@@ -366,7 +368,7 @@ public class DailyLogServiceImpl implements DailyLogService {
         // Check for existing log
         DailyLog existingDailyLog = dailyLogRepository.findDailyLogByLogDateAndUserModel_userId(newDailyLogData.getLogDate(), userId);
         if (existingDailyLog != null) {
-            throw new InvalidInputException("Daily log already exists for date " + newDailyLogData.getLogDate());
+            throw new ExistingLogDateException("Daily log already exists for date " + newDailyLogData.getLogDate());
         }
 
         // Create and save daily log
@@ -465,13 +467,21 @@ public class DailyLogServiceImpl implements DailyLogService {
         // Validate user exists
         UserModel foundUser = usersServiceClient.getUserByUserId(userId);
         if (foundUser == null) {
-            throw new InvalidInputException("User with id " + userId + " not found");
+            throw new NotFoundException("User with id " + userId + " not found");
         }
 
         // Get existing daily log
         DailyLog existingDailyLog = dailyLogRepository.findDailyLogByDailyLogIdentifier_DailyLogIdAndUserModel_userId(dailyLogId, userId);
         if (existingDailyLog == null) {
-            throw new InvalidInputException("Daily log with id " + dailyLogId + " not found for user " + userId);
+            throw new NotFoundException("Daily log with id " + dailyLogId + " not found for user " + userId);
+        }
+
+        // Check if updating to a date that already has a log (but not the current log)
+        if (!existingDailyLog.getLogDate().equals(newDailyLogData.getLogDate())) {
+            DailyLog duplicateDateLog = dailyLogRepository.findDailyLogByLogDateAndUserModel_userId(newDailyLogData.getLogDate(), userId);
+            if (duplicateDateLog != null) {
+                throw new ExistingLogDateException("Cannot update log date - a daily log already exists for date " + newDailyLogData.getLogDate());
+            }
         }
 
         // Handle workout
@@ -479,7 +489,7 @@ public class DailyLogServiceImpl implements DailyLogService {
         if (newDailyLogData.getWorkoutIdentifier() != null && !newDailyLogData.getWorkoutIdentifier().equals("None")) {
             workout = workoutsServiceClient.getWorkoutByWorkoutId(newDailyLogData.getWorkoutIdentifier());
             if (workout == null) {
-                throw new InvalidInputException("Workout with id " + newDailyLogData.getWorkoutIdentifier() + " not found");
+                throw new NotFoundException("Workout with id " + newDailyLogData.getWorkoutIdentifier() + " not found");
             }
             if (workout.getWorkoutDurationInMinutes() == null) {
                 workout.setWorkoutDurationInMinutes(workoutsServiceClient.getWorkoutDuration(newDailyLogData.getWorkoutIdentifier()));
@@ -494,7 +504,7 @@ public class DailyLogServiceImpl implements DailyLogService {
         if (newDailyLogData.getBreakfastIdentifier() != null && !newDailyLogData.getBreakfastIdentifier().isEmpty()) {
             breakfast = mealsServiceClient.getMealByMealId(newDailyLogData.getBreakfastIdentifier());
             if (breakfast == null) {
-                throw new InvalidInputException("Breakfast meal with id " + newDailyLogData.getBreakfastIdentifier() + " not found");
+                throw new NotFoundException("Breakfast meal with id " + newDailyLogData.getBreakfastIdentifier() + " not found");
             }
             if (breakfast.getMealCalorie() == null) {
                 breakfast.setMealCalorie(mealsServiceClient.getCalories(newDailyLogData.getBreakfastIdentifier()));
@@ -508,7 +518,7 @@ public class DailyLogServiceImpl implements DailyLogService {
         if (newDailyLogData.getLunchIdentifier() != null && !newDailyLogData.getLunchIdentifier().isEmpty()) {
             lunch = mealsServiceClient.getMealByMealId(newDailyLogData.getLunchIdentifier());
             if (lunch == null) {
-                throw new InvalidInputException("Lunch meal with id " + newDailyLogData.getLunchIdentifier() + " not found");
+                throw new NotFoundException("Lunch meal with id " + newDailyLogData.getLunchIdentifier() + " not found");
             }
             if (lunch.getMealCalorie() == null) {
                 lunch.setMealCalorie(mealsServiceClient.getCalories(newDailyLogData.getLunchIdentifier()));
@@ -522,7 +532,7 @@ public class DailyLogServiceImpl implements DailyLogService {
                 !newDailyLogData.getDinnerIdentifier().equals("None")) {
             dinner = mealsServiceClient.getMealByMealId(newDailyLogData.getDinnerIdentifier());
             if (dinner == null) {
-                throw new InvalidInputException("Dinner meal with id " + newDailyLogData.getDinnerIdentifier() + " not found");
+                throw new NotFoundException("Dinner meal with id " + newDailyLogData.getDinnerIdentifier() + " not found");
             }
             if (dinner.getMealCalorie() == null) {
                 dinner.setMealCalorie(mealsServiceClient.getCalories(newDailyLogData.getDinnerIdentifier()));
@@ -538,7 +548,7 @@ public class DailyLogServiceImpl implements DailyLogService {
                 if (snackId != null && !snackId.isEmpty()) {
                     MealModel snack = mealsServiceClient.getMealByMealId(snackId);
                     if (snack == null) {
-                        throw new InvalidInputException("Snack meal with id " + snackId + " not found");
+                        throw new NotFoundException("Snack meal with id " + snackId + " not found");
                     }
                     if (snack.getMealCalorie() == null) {
                         snack.setMealCalorie(mealsServiceClient.getCalories(snackId));
@@ -642,12 +652,12 @@ public class DailyLogServiceImpl implements DailyLogService {
     public void deleteDailyLog(String dailyLogId, String userId) {
         UserModel foundUser = usersServiceClient.getUserByUserId(userId);
         if (foundUser == null) {
-            throw new InvalidInputException("User with id " + userId + " not found");
+            throw new NotFoundException("User with id " + userId + " not found");
         }
 
         DailyLog existingDailyLog = dailyLogRepository.findDailyLogByDailyLogIdentifier_DailyLogIdAndUserModel_userId(dailyLogId, userId);
         if (existingDailyLog == null) {
-            throw new InvalidInputException("Daily log with id " + dailyLogId + " not found for user " + userId);
+            throw new NotFoundException("Daily log with id " + dailyLogId + " not found for user " + userId);
         }
 
         dailyLogRepository.delete(existingDailyLog);

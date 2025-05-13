@@ -3,7 +3,7 @@ services:
     build: ./api-gateway
     hostname: api-gateway
     ports:
-      - "8084:8084"
+      - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
@@ -15,8 +15,6 @@ services:
   users-service:
     build: ./users-service
     hostname: users-service
-    ports:
-      - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-users/users-db
@@ -29,8 +27,6 @@ services:
   workouts-service:
     build: ./workouts-service
     hostname: workouts-service
-    ports:
-      - "8081:8081"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-workouts/workouts-db
@@ -43,8 +39,6 @@ services:
   meals-service:
     build: ./meals-service
     hostname: meals-service
-    ports:
-      - "8082:8082"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-meals/meals-db
@@ -56,8 +50,6 @@ services:
   dailylogs-service:
     build: dailylogs-service
     hostname: dailylogs-service
-    ports:
-      - "8083:8083"                                 # Map the container port to the host port - 8084
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:

@@ -2,6 +2,7 @@ package com.fitnesstracker.apigateway.presentationlayer.meals;
 
 import com.fitnesstracker.apigateway.domainclientlayer.meals.MealType;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.hateoas.RepresentationModel;
@@ -11,6 +12,7 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class MealResponseModel extends RepresentationModel<MealResponseModel> {
     private String mealId;
     //private String userId;

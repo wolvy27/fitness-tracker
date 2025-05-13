@@ -77,6 +77,6 @@ spring:
       schema-locations: classpath:schema-psql.sql
       data-locations: classpath:data-psql.sql
 
-server.port: 8082
+server.port: 8083
 
 spring.datasource.hikari.initializationFailTimeout: 60000

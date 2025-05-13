@@ -1,136 +1,85 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Integration test script for Fitness Tracker Microservices
 
-# API Gateway base URL
-API_GATEWAY_URL="http://localhost:8084"
+# Configuration
+: ${HOST=localhost}
+: ${PORT=8080}  # API Gateway port
+API_BASE="http://$HOST:$PORT/api"
 
-# Test data
-USER_ID="2dbdcb96-6479-43db-860f-bf99fd854940"  # Alice's user ID
-DAILY_LOG_ID="dialbici-diel-41fi-gih1-iljik11im1n1"
-MEAL_ID="alb2c3d4-e5f6-47g8-h91d-j1k213m4n5o6"  # Alice's breakfast
-WORKOUT_ID="38f8492b-4d5a-4326-9981-32bffb132938"  # Alice's cardio workout
+# Test data IDs
+declare -A testIds=(
+  [user]=""
+  [workout]=""
+  [meal]=""
+  [dailylog]=""
+)
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-NC='\033[0m' # No Color
+# Helper functions
+function assertCurl() {
+  local expectedHttpCode=$1
+  local curlCmd="$2 -w \"%{http_code}\""
+  local result=$(eval $curlCmd)
+  local httpCode="${result:(-3)}"
+  RESPONSE='' && (( ${#result} > 3 )) && RESPONSE="${result%???}"
 
-# Function to print test results
-print_result() {
-    if [ $1 -eq 0 ]; then
-        echo -e "${GREEN}SUCCESS${NC}: $2"
-    else
-        echo -e "${RED}FAILED${NC}: $2"
-    fi
+  if [ "$httpCode" = "$expectedHttpCode" ]
+  then
+    echo "Test OK (HTTP Code: $httpCode)"
+  else
+    echo "Test FAILED, EXPECTED HTTP Code: $expectedHttpCode, GOT: $httpCode"
+    echo "- Failing command: $curlCmd"
+    echo "- Response Body: $RESPONSE"
+    exit 1
+  fi
 }
 
-# Test 1: Get all users
-echo "Testing GET /api/v1/users..."
-response=$(curl -s -o /dev/null -w "%{http_code}" "${API_GATEWAY_URL}/api/v1/users")
-if [ "$response" -eq 200 ]; then
-    print_result 0 "Get all users"
-else
-    print_result 1 "Get all users (Status: $response)"
-fi
+function assertEqual() {
+  local expected=$1
+  local actual=$2
 
-# Test 2: Get specific user
-echo "Testing GET /api/v1/users/${USER_ID}..."
-response=$(curl -s -o /dev/null -w "%{http_code}" "${API_GATEWAY_URL}/api/v1/users/${USER_ID}")
-if [ "$response" -eq 200 ]; then
-    print_result 0 "Get user by ID"
-else
-    print_result 1 "Get user by ID (Status: $response)"
-fi
+  if [ "$actual" = "$expected" ]
+  then
+    echo "Test OK (actual value: $actual)"
+  else
+    echo "Test FAILED, EXPECTED VALUE: $expected, ACTUAL VALUE: $actual"
+    exit 1
+  fi
+}
 
-# Test 3: Get daily logs for user
-echo "Testing GET /api/v1/${USER_ID}/dailylogs..."
-response=$(curl -s -o /dev/null -w "%{http_code}" "${API_GATEWAY_URL}/api/v1/${USER_ID}/dailylogs")
-if [ "$response" -eq 200 ]; then
-    print_result 0 "Get daily logs for user"
-else
-    print_result 1 "Get daily logs for user (Status: $response)"
-fi
+function testUrl() {
+  url=$@
+  if curl $url -ks -o /dev/null
+  then
+    echo "Ok"
+    return 0
+  else
+    echo -n "not yet"
+    return 1
+  fi
+}
 
-# Test 4: Get specific daily log
-echo "Testing GET /api/v1/${USER_ID}/dailylogs/${DAILY_LOG_ID}..."
-response=$(curl -s -o /dev/null -w "%{http_code}" "${API_GATEWAY_URL}/api/v1/${USER_ID}/dailylogs/${DAILY_LOG_ID}")
-if [ "$response" -eq 200 ]; then
-    print_result 0 "Get specific daily log"
-else
-    print_result 1 "Get specific daily log (Status: $response)"
-fi
+function waitForService() {
+  url=$@
+  echo -n "Wait for: $url..."
+  n=0
+  until testUrl $url
+  do
+    n=$((n + 1))
+    if [[ $n == 100 ]]
+    then
+      echo " Give up"
+      exit 1
+    else
+      sleep 6
+      echo -n ", retry #$n "
+    fi
+  done
+}
 
-# Test 5: Check calories goal status (similar to your test example)
-echo "Testing calories goal status..."
-# First get the user's daily calorie intake goal
-calorie_goal=$(curl -s "${API_GATEWAY_URL}/api/v1/users/${USER_ID}/dailycalorieintake" | jq -r '.')
-if [ -z "$calorie_goal" ]; then
-    calorie_goal=1800  # Default value if not found
-fi
-
-# Get the daily log and calculate total calories
-daily_log=$(curl -s "${API_GATEWAY_URL}/api/v1/${USER_ID}/dailylogs/${DAILY_LOG_ID}")
-breakfast_calories=$(echo "$daily_log" | jq -r '.breakFastCalories')
-lunch_calories=$(echo "$daily_log" | jq -r '.lunchCalories')
-dinner_calories=$(echo "$daily_log" | jq -r '.dinnerCalories')
-total_calories=$((breakfast_calories + lunch_calories + dinner_calories))
-
-# Check if within 10% of goal
-lower_bound=$((calorie_goal * 90 / 100))
-upper_bound=$((calorie_goal * 110 / 100))
-
-if [ "$total_calories" -ge "$lower_bound" ] && [ "$total_calories" -le "$upper_bound" ]; then
-    status="ACHIEVED"
-else
-    status="MISSED"
-fi
-
-# Verify the status in the response
-response_status=$(echo "$daily_log" | jq -r '.metCaloriesGoal')
-if [ "$response_status" == "$status" ]; then
-    print_result 0 "Calories goal status check (Expected: $status, Actual: $response_status)"
-else
-    print_result 1 "Calories goal status check (Expected: $status, Actual: $response_status)"
-fi
-
-# Test 6: Get all meals
-echo "Testing GET /api/v1/meals..."
-response=$(curl -s -o /dev/null -w "%{http_code}" "${API_GATEWAY_URL}/api/v1/meals")
-if [ "$response" -eq 200 ]; then
-    print_result 0 "Get all meals"
-else
-    print_result 1 "Get all meals (Status: $response)"
-fi
-
-# Test 7: Get specific meal
-echo "Testing GET /api/v1/meals/${MEAL_ID}..."
-response=$(curl -s -o /dev/null -w "%{http_code}" "${API_GATEWAY_URL}/api/v1/meals/${MEAL_ID}")
-if [ "$response" -eq 200 ]; then
-    print_result 0 "Get meal by ID"
-else
-    print_result 1 "Get meal by ID (Status: $response)"
-fi
-
-# Test 8: Get all workouts
-echo "Testing GET /api/v1/workouts..."
-response=$(curl -s -o /dev/null -w "%{http_code}" "${API_GATEWAY_URL}/api/v1/workouts")
-if [ "$response" -eq 200 ]; then
-    print_result 0 "Get all workouts"
-else
-    print_result 1 "Get all workouts (Status: $response)"
-fi
-
-# Test 9: Get specific workout
-echo "Testing GET /api/v1/workouts/${WORKOUT_ID}..."
-response=$(curl -s -o /dev/null -w "%{http_code}" "${API_GATEWAY_URL}/api/v1/workouts/${WORKOUT_ID}")
-if [ "$response" -eq 200 ]; then
-    print_result 0 "Get workout by ID"
-else
-    print_result 1 "Get workout by ID (Status: $response)"
-fi
-
-# Test 10: Create a new user
-echo "Testing POST /api/v1/users..."
-new_user_data='{
+# Setup test data
+function setupTestdata() {
+  # Create a test user
+  body='{
     "firstName": "Test",
     "lastName": "User",
     "age": 30,
@@ -139,11 +88,167 @@ new_user_data='{
     "goalDescription": "Test goal",
     "dailyCaloricIntake": 2000,
     "workoutDays": ["MONDAY", "WEDNESDAY"]
-}'
+  }'
+  recreateUser "$body"
 
-response=$(curl -s -o /dev/null -w "%{http_code}" -X POST -H "Content-Type: application/json" -d "$new_user_data" "${API_GATEWAY_URL}/api/v1/users")
-if [ "$response" -eq 201 ]; then
-    print_result 0 "Create new user"
+  # Create a test workout
+  body='{
+    "workoutName": "Test Workout",
+    "workoutType": "CARDIO",
+    "durationInMinutes": 45,
+    "workoutDate": "2025-05-01"
+  }'
+  recreateWorkout "$body"
+
+  # Create a test meal
+  body='{
+    "mealName": "Test Meal",
+    "calories": 500,
+    "mealDate": "2025-05-01",
+    "mealType": "LUNCH"
+  }'
+  recreateMeal "$body"
+}
+
+# Data creation functions
+function recreateUser() {
+  local aggregate=$1
+  echo "Creating user..."
+  testIds[user]=$(curl -X POST "$API_BASE/v1/users" \
+    -H "Content-Type: application/json" \
+    -d "$aggregate" | jq -r '.userId')
+  echo "Created user with id: ${testIds[user]}"
+}
+
+function recreateWorkout() {
+  local aggregate=$1
+  echo "Creating workout..."
+  testIds[workout]=$(curl -X POST "$API_BASE/v1/workouts" \
+    -H "Content-Type: application/json" \
+    -d "$aggregate" | jq -r '.workoutId')
+  echo "Created workout with id: ${testIds[workout]}"
+}
+
+function recreateMeal() {
+  local aggregate=$1
+  echo "Creating meal..."
+  testIds[meal]=$(curl -X POST "$API_BASE/v1/meals" \
+    -H "Content-Type: application/json" \
+    -d "$aggregate" | jq -r '.mealId')
+  echo "Created meal with id: ${testIds[meal]}"
+}
+
+# Test execution
+echo "Starting tests..."
+echo "API Gateway: $HOST:$PORT"
+
+# Verify environment is ready
+waitForService curl -X DELETE "$API_BASE/v1/users/00000000-0000-0000-0000-000000000000"
+
+# Setup test data
+setupTestdata
+
+# Test low-level microservices through API Gateway
+echo -e "\nTEST 1: Verify GET user endpoint"
+assertCurl 200 "curl $API_BASE/v1/users/${testIds[user]} -s"
+assertEqual "\"Test\"" $(echo $RESPONSE | jq ".firstName")
+
+echo -e "\nTEST 2: Verify GET workout endpoint"
+assertCurl 200 "curl $API_BASE/v1/workouts/${testIds[workout]} -s"
+WORKOUT_NAME=$(echo $RESPONSE | jq -r '.workoutName')
+echo "Extracted workout name: '$WORKOUT_NAME'"
+assertEqual "Test Workout" "$WORKOUT_NAME"
+
+echo -e "\nTEST 3: Verify GET meal endpoint"
+assertCurl 200 "curl $API_BASE/v1/meals/${testIds[meal]} -s"
+MEAL_NAME=$(echo $RESPONSE | jq -r '.mealName')
+echo "Extracted meal name: '$MEAL_NAME'"
+assertEqual "Test Meal" "$MEAL_NAME"
+
+# Update the API base to include /v1
+API_BASE="http://$HOST:$PORT/api/v1"
+
+# Update the daily log creation and retrieval sections:
+
+# Create daily log
+echo -e "\nTEST 4: Create daily log"
+body=$(cat <<EOF
+{
+  "workoutIdentifier": "${testIds[workout]}",
+  "logDate": "2025-05-05",
+  "breakfastIdentifier": "${testIds[meal]}",
+  "lunchIdentifier": "${testIds[meal]}",
+  "dinnerIdentifier": "${testIds[meal]}",
+  "snacksIdentifier": ["${testIds[meal]}"]
+}
+EOF
+)
+
+# Use user-specific endpoint for creation
+FULL_RESPONSE=$(curl -s -X POST "$API_BASE/users/${testIds[user]}/dailyLogs" \
+  -H "Content-Type: application/json" \
+  -d "$body")
+
+# Print the full response for debugging and verification
+echo -e "\n Full Response:"
+echo "$FULL_RESPONSE" | jq .
+
+# Extract the ID from the response
+parsedId=$(echo "$FULL_RESPONSE" | jq -r '.dailyLogIdentifier // .dailyLogId // .id')
+
+# Store and display the result
+if [[ "$parsedId" == "null" || -z "$parsedId" ]]; then
+    echo "X Failed to extract daily log ID!"
 else
-    print_result 1 "Create new user (Status: $response)"
+    testIds[dailylog]=$parsedId
+    echo -e "\n Yay! Created daily log with ID: ${testIds[dailylog]}"
 fi
+
+
+# Verify GET daily log - use user-specific endpoint
+echo -e "\nTEST 5: Verify GET daily log endpoint"
+assertCurl 200 "curl $API_BASE/users/${testIds[user]}/dailyLogs/${testIds[dailylog]} -s"
+USER_LASTNAME=$(echo $RESPONSE | jq -r '.userLastName')
+echo "Extracted user last name: '$USER_LASTNAME'"
+assertEqual "User" "$USER_LASTNAME"  # Or whatever your expected value is
+
+# Verify GET all daily logs for user
+echo -e "\nTEST 6: Verify GET all daily logs for user"
+assertCurl 200 "curl $API_BASE/users/${testIds[user]}/dailyLogs -s"
+assertEqual 1 $(echo $RESPONSE | jq ". | length")
+echo -e "\nTEST 7: Verify aggregate invariant - workout goal status"
+# Should be ACHIEVED since we created a workout for a workout day (Monday)
+assertEqual "\"ACHIEVED\"" $(echo $RESPONSE | jq ".[0].metWorkoutGoal")
+
+echo -e "\nTEST 8: Verify aggregate invariant - calorie goal status"
+# Should be ACHIEVED since total calories (500*3=1500) is within 90-110% of goal (2000)
+assertEqual "\"ACHIEVED\"" $(echo $RESPONSE | jq ".[0].metCaloriesGoal")
+
+echo -e "\nTEST 9: Update daily log"
+body=$(cat <<EOF
+{
+  "workoutIdentifier": "None",
+  "logDate": "2025-05-05",
+  "breakfastIdentifier": "${testIds[meal]}",
+  "lunchIdentifier": "${testIds[meal]}",
+  "dinnerIdentifier": "${testIds[meal]}",
+  "snacksIdentifier": []
+}
+EOF
+)
+assertCurl 200 "curl -X PUT $API_BASE/users/${testIds[user]}/dailyLogs/${testIds[dailylog]} \
+  -H \"Content-Type: application/json\" \
+  -d '$body' -s"
+
+echo -e "\nTEST 10: Verify workout goal status after update"
+# Should be MISSED since we set workout to "None" on a workout day
+assertCurl 200 "curl $API_BASE/users/${testIds[user]}/dailyLogs/${testIds[dailylog]} -s"
+assertEqual "\"MISSED\"" $(echo $RESPONSE | jq ".metWorkoutGoal")
+
+echo -e "\nTEST 11: Delete daily log"
+assertCurl 204 "curl -X DELETE $API_BASE/users/${testIds[user]}/dailyLogs/${testIds[dailylog]} -s"
+
+echo -e "\nTEST 12: Verify daily log is deleted"
+assertCurl 404 "curl $API_BASE/users/${testIds[user]}/dailyLogs/${testIds[dailylog]} -s"
+
+echo -e "\nAll tests passed successfully!"

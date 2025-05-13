@@ -53,9 +53,9 @@ class DailyLogControllerIntegrationTest {
     private final String FOUND_USER_ID = "2dbdcb96-6479-430b-860f-bf99fd854940"; // Alice
     private final String NOT_FOUND_USER_ID = UUID.randomUUID().toString();
 
-    private final String BASE_URI_USERS = "http://localhost:8080/api/v1/users/";
-    private final String BASE_URI_WORKOUTS = "http://localhost:8081/api/v1/workouts/";
-    private final String BASE_URI_MEALS = "http://localhost:8082/api/v1/meals/";
+    private final String BASE_URI_USERS = "http://localhost:8081/api/v1/users/";
+    private final String BASE_URI_WORKOUTS = "http://localhost:8082/api/v1/workouts/";
+    private final String BASE_URI_MEALS = "http://localhost:8083/api/v1/meals/";
 
     @BeforeEach
     public void init() {

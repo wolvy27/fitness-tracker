@@ -14,6 +14,7 @@ import com.fitnesstracker.dailylogs.domainclientlayer.workouts.WorkoutModel;
 import com.fitnesstracker.dailylogs.domainclientlayer.workouts.WorkoutsServiceClient;
 import com.fitnesstracker.dailylogs.presentationlayer.DailyLogRequestModel;
 import com.fitnesstracker.dailylogs.presentationlayer.DailyLogResponseModel;
+import com.fitnesstracker.dailylogs.utils.exceptions.ExistingLogDateException;
 import com.fitnesstracker.dailylogs.utils.exceptions.InvalidInputException;
 import com.fitnesstracker.dailylogs.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +25,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -331,7 +333,7 @@ class DailyLogServiceUnitTest {
         when(usersServiceClient.getUserByUserId(invalidUserId)).thenReturn(null);
 
         // Act & Assert
-        assertThrows(InvalidInputException.class, () -> {
+        assertThrows(NotFoundException.class, () -> {
             dailyLogService.getDailyLogs(invalidUserId);
         });
 
@@ -346,7 +348,7 @@ class DailyLogServiceUnitTest {
         when(usersServiceClient.getUserByUserId(invalidUserId)).thenReturn(null);
 
         // Act & Assert
-        assertThrows(InvalidInputException.class, () -> {
+        assertThrows(NotFoundException.class, () -> {
             dailyLogService.getDailyLogByDailyLogId(dailyLogId, invalidUserId);
         });
 
@@ -362,7 +364,7 @@ class DailyLogServiceUnitTest {
                 .thenReturn(null);
 
         // Act & Assert
-        assertThrows(InvalidInputException.class, () -> {
+        assertThrows(NotFoundException.class, () -> {
             dailyLogService.getDailyLogByDailyLogId(dailyLogId, userId);
         });
 
@@ -378,7 +380,7 @@ class DailyLogServiceUnitTest {
         when(usersServiceClient.getUserByUserId(invalidUserId)).thenReturn(null);
 
         // Act & Assert
-        assertThrows(InvalidInputException.class, () -> {
+        assertThrows(NotFoundException.class, () -> {
             dailyLogService.addDailyLog(requestModel, invalidUserId);
         });
 
@@ -394,7 +396,7 @@ class DailyLogServiceUnitTest {
         when(workoutsServiceClient.getWorkoutByWorkoutId(workoutId)).thenReturn(null);
 
         // Act & Assert
-        assertThrows(InvalidInputException.class, () -> {
+        assertThrows(NotFoundException.class, () -> {
             dailyLogService.addDailyLog(requestModel, userId);
         });
 
@@ -412,7 +414,7 @@ class DailyLogServiceUnitTest {
         when(mealsServiceClient.getMealByMealId(breakfastId)).thenReturn(null);
 
         // Act & Assert
-        assertThrows(InvalidInputException.class, () -> {
+        assertThrows(NotFoundException.class, () -> {
             dailyLogService.addDailyLog(requestModel, userId);
         });
 
@@ -435,7 +437,7 @@ class DailyLogServiceUnitTest {
                 .thenReturn(dailyLog);
 
         // Act & Assert
-        assertThrows(InvalidInputException.class, () -> {
+        assertThrows(ExistingLogDateException.class, () -> {
             dailyLogService.addDailyLog(requestModel, userId);
         });
 
@@ -454,7 +456,7 @@ class DailyLogServiceUnitTest {
                 .thenReturn(null);
 
         // Act & Assert
-        assertThrows(InvalidInputException.class, () -> {
+        assertThrows(NotFoundException.class, () -> {
             dailyLogService.updateDailyLog(requestModel, dailyLogId, userId);
         });
 
@@ -472,7 +474,7 @@ class DailyLogServiceUnitTest {
                 .thenReturn(null);
 
         // Act & Assert
-        assertThrows(InvalidInputException.class, () -> {
+        assertThrows(NotFoundException.class, () -> {
             dailyLogService.deleteDailyLog(dailyLogId, userId);
         });
 
@@ -602,7 +604,7 @@ class DailyLogServiceUnitTest {
         when(mealsServiceClient.getMealByMealId(invalidMealId)).thenReturn(null);
 
         // Act & Assert
-        assertThrows(InvalidInputException.class, () -> {
+        assertThrows(NotFoundException.class, () -> {
             dailyLogService.updateDailyLog(invalidRequest, dailyLogId, userId);
         });
     }
@@ -610,7 +612,7 @@ class DailyLogServiceUnitTest {
     @Test
     public void whenAddDailyLogWithNullRequest_thenThrowException() {
         // Act & Assert
-        assertThrows(InvalidInputException.class, () -> {
+        assertThrows(NotFoundException.class, () -> {
             dailyLogService.addDailyLog(null, userId);
         });
     }

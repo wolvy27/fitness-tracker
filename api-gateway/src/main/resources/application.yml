@@ -10,16 +10,16 @@ logging:
 app:
   users-service:
     host: localhost
-    port: 8080
+    port: 8081
   workouts-service:
     host: localhost
-    port: 8081
+    port: 8082
   meals-service:
     host: localhost
-    port: 8082
+    port: 8083
   dailylogs-service:
     host: localhost
-    port: 8083
+    port: 8084
 
 ---
 
@@ -28,19 +28,19 @@ spring:
     activate:
       on-profile: docker
 
-server.port: 8084
+server.port: 8080
 
 app:
   users-service:
     #must match Docker host name
     host: users-service
-    port: 8080
+    port: 8081
   workouts-service:
     host: workouts-service
-    port: 8081
+    port: 8082
   meals-service:
     host: meals-service
-    port: 8082
+    port: 8083
   dailylogs-service:
     host: dailylogs-service
-    port: 8083
+    port: 8084
