@@ -58,8 +58,7 @@ jacocoTestReport {
 	afterEvaluate {
 		classDirectories.setFrom(files(classDirectories.files.collect {
 			fileTree(dir: it, exclude: [
-					//"com/movielister/**/MovieDetailsServiceApplication.class",
-					// "**/*MapperImpl.class"
+
 			])
 		}))
 	}

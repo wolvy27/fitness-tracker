@@ -3,6 +3,7 @@ package com.fitnesstracker.apigateway.domainclientlayer.dailylogs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fitnesstracker.apigateway.presentationlayer.dailylogs.DailyLogRequestModel;
 import com.fitnesstracker.apigateway.presentationlayer.dailylogs.DailyLogResponseModel;
+import com.fitnesstracker.apigateway.utils.exceptions.ExistingLogDateException;
 import com.fitnesstracker.apigateway.utils.exceptions.InvalidInputException;
 import com.fitnesstracker.apigateway.utils.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,8 +20,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
+import static org.springframework.http.HttpStatus.*;
 
 @Slf4j
 @Component
@@ -104,6 +104,9 @@ public class DailyLogServiceClient {
         }
         if (ex.getStatusCode() == UNPROCESSABLE_ENTITY) {
             return new InvalidInputException(getErrorMessage(ex));
+        }
+        if (ex.getStatusCode() == CONFLICT) {
+            return new ExistingLogDateException(getErrorMessage(ex));
         }
         log.warn("Got an unexpected HTTP error: {}, will rethrow it", ex.getStatusCode());
         log.warn("Error body: {}", ex.getResponseBodyAsString());

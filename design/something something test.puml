@@ -1,0 +1,313 @@
+@startuml
+hide circle
+top to bottom direction
+scale 0.2
+!define ENTITY(x) class x << Entity >> #lightPink
+!define ENUM(x) class x << Enum >> #Thistle
+!define AGGREGATE(x) class x << Aggregate >> #LightSkyBlue
+!define AGGREGATE_ROOT(x) class x << Aggregate Root >> #MediumAquamarine
+!define AGGREGATE_ROOT_ENTITY(x) class x << Aggregate Root >> << Entity >> #MediumAquamarine
+!define VALUE_OBJECT(x) class x << Value Object >> #Bisque
+!pragma useVerticalIf on
+skinparam dpi 350
+skinparam packageStyle rectangle
+skinparam rectangle {
+    BackgroundColor #f7f4eb
+    BorderColor Black
+}
+
+rectangle "Pawnshop Context" as PawnshopContext #line.dashed {
+
+  package "Loan Sub-Domain" as LoanDomain <<Rectangle>> #LightGreen {
+    VALUE_OBJECT(LoanIdentifier) {
+      LoanId: UUID
+    }
+    VALUE_OBJECT(PawnTicketIdentifier) {
+      PawnTicketId: UUID
+    }
+
+    AGGREGATE_ROOT(PawnLoan) {
+      LoanId: LoanIdentifier
+      PawnItemId: PawnItemIdentifier
+      LoanStartDate: LocalDate
+      LoanDueDate: LocalDate
+      LoanPeriod: Int
+      IsGracePeriod: Boolean
+      GracePeriodLength: Int
+      LoanStatus: LoanStatus
+      LoanTerms: String
+      InterestRate: BigDecimal
+      LoanDisbursedAmount: BigDecimal
+      TotalLoanAmount: BigDecimal
+    }
+
+    ENUM(LoanStatus) {
+      ACTIVE
+      PAID_OFF
+      DEFAULTED
+      GRACE_PERIOD
+      EXTENDED
+    }
+
+    AGGREGATE(PawnTicket) {
+      PawnTicketId: PawnTicketIdentifier
+      LoanId: LoanIdentifier
+      IssuedDate: LocalDate
+      CustomerId: CustomerIdentifier
+      PawnItemId: PawnItemIdentifier
+      ExpirationDate: LocalDate
+    }
+  }
+
+  package "Purchase Sub-Domain" as PurchaseDomain <<Rectangle>> #DFBDF4 {
+    VALUE_OBJECT(PawnPurchaseIdentifier) {
+      PawnPurchaseId: UUID
+    }
+
+    AGGREGATE(PawnPurchase) {
+      PawnPurchaseId: PawnPurchaseIdentifier
+      PawnItemId: PawnItemIdentifier
+      CustomerId: CustomerIdentifier
+      EmployeeId: EmployeeIdentifier
+      ConsultantId: ConsultantIdentifier
+      PurchaseAmount: Double
+      PurchaseDate: LocalDate
+    }
+  }
+
+  package "Inventory Sub-Domain" as InventoryDomain <<Rectangle>> #LightBlue {
+    VALUE_OBJECT(PawnItemIdentifier) {
+      PawnItemId: UUID
+    }
+    VALUE_OBJECT(InventoryIdentifier) {
+      InventoryId: UUID
+    }
+
+    ENTITY(PawnItem) {
+      PawnItemId: PawnItemIdentifier
+      ItemName: String
+      ItemDescription: String
+      AssessedValue: Double
+      SalesPrice: BigDecimal
+      SoldDate: LocalDate?
+    }
+
+    ENUM(ItemStatus) {
+      LOAN_COLLATERAL
+      FOR_SALE
+      SOLD
+    }
+
+    AGGREGATE_ROOT(Inventory) {
+      InventoryId: InventoryIdentifier
+      InventoryType: InventoryType
+    }
+
+    ENUM(InventoryType) {
+      JEWELRY
+      ELECTRONICS
+      FURNITURE
+      FIREARMS
+      CARDS
+      TOOLS
+      MUSICAL_INSTRUMENTS
+      AUTOGRAPHS
+      OTHER
+    }
+  }
+
+  package "Customer Sub-Domain" as CustomerDomain <<Rectangle>> #deb887 {
+    VALUE_OBJECT(CustomerIdentifier) {
+      CustomerId: UUID
+    }
+
+    ENTITY(Customer) {
+      CustomerId: CustomerIdentifier
+      CustomerFirstName: String
+      CustomerLastName: String
+      CustomerAddress: Address
+      CustomerPhoneNumber: PhoneNumber
+      CustomerEmailAddress: String
+      DateOfBirth: LocalDate
+      GovernmentId: GovernmentId
+    }
+
+    VALUE_OBJECT(PhoneNumber) {
+      Number: String
+      PhoneType: PhoneType
+    }
+
+    ENUM(PhoneType) {
+      MOBILE
+      HOME
+      WORK
+    }
+
+    VALUE_OBJECT(GovernmentId) {
+      GovernmentId: String
+      IdType: IdType
+      IssuingCountry: String
+      ExpirationDate: LocalDate
+      ImageUrl: String
+    }
+
+    ENUM(IdType) {
+      DRIVER_LICENSCE
+      PASSPORT
+      ETC
+    }
+
+    VALUE_OBJECT(Address) {
+      Street: String
+      HouseNumber: String
+      PostalCode: String
+      City: String
+      ProvinceOrState: String
+      Country: String
+    }
+  }
+
+  package "Employee/Consultant Sub-Domain" as StaffDomain <<Rectangle>> #f9d3d3 {
+    VALUE_OBJECT(EmployeeIdentifier) {
+      EmployeeId: UUID
+    }
+    VALUE_OBJECT(ConsultantIdentifier) {
+      ConsultantId: UUID
+    }
+
+    ENTITY(Employee) {
+      EmployeeId: EmployeeIdentifier
+      EmployeeFirstName: String
+      EmployeeLastName: String
+      EmployeeAddress: Address
+      EmployeePhoneNumber: PhoneNumber
+      EmployeeEmailAddress: String
+      DateOfBirth: LocalDate
+      EmployeeTitle: String
+    }
+
+    ENTITY(Consultant) {
+      ConsultantId: ConsultantIdentifier
+      ConsultantFirstName: String
+      ConsultantLastName: String
+      ConsultantAddress: Address
+      ConsultantPhoneNumber: PhoneNumber
+      ConsultantEmailAddress: String
+      Expertise: String
+      PaymentPerAppraisal: Double
+    }
+  }
+
+  package "Appraisal Sub-Domain" as AppraisalDomain <<Rectangle>> #F6E3B4 {
+    VALUE_OBJECT(AppraisalIdentifier) {
+      AppraisalId: UUID
+    }
+
+    ENTITY(Appraisal) {
+      AppraisalId: AppraisalIdentifier
+      PawnItemId: PawnItemIdentifier
+      ConsultantId: ConsultantIdentifier?
+      EmployeeId: EmployeeIdentifier?
+      AssessedValue: BigDecimal
+      AppraisalDate: LocalDate
+      Notes: String?
+    }
+  }
+
+  package "Payment and Sales Sub-Domain" as PaymentDomain <<Rectangle>> #B1C5F7 {
+    VALUE_OBJECT(PaymentIdentifier) {
+      PaymentId: UUID
+    }
+    VALUE_OBJECT(SaleIdentifier) {
+      SaleId: UUID
+    }
+    VALUE_OBJECT(SaleItemIdentifier) {
+      SaleItemId: UUID
+    }
+
+    AGGREGATE(Payments) {
+      PaymentId: PaymentIdentifier
+      LoanId: LoanIdentifier?
+      PurchaseId: PawnPurchaseIdentifier?
+      CustomerId: CustomerIdentifier
+      EmployeeId: EmployeeIdentifier
+      Amount: Double
+      CurrencyType: CurrencyType
+      PaymentType: PaymentType
+    }
+
+    ENUM(PaymentType) {
+      CASH
+      DEBIT_CARD
+      CREDIT_CARD
+      PAYPAL
+    }
+
+    ENUM(CurrencyType) {
+      USD
+      CAD
+      EUR
+      JPY
+      GBP
+      AUD
+      CNY
+      INR
+      MXN
+    }
+
+    AGGREGATE(Sale) {
+      SaleId: SaleIdentifier
+      CustomerId: CustomerIdentifier
+      EmployeeId: EmployeeIdentifier
+      SaleDate: LocalDate
+      TotalAmount: BigDecimal
+      PaymentId: PaymentIdentifier
+    }
+
+    ENTITY(SaleItem) {
+      SaleItemId: SaleItemIdentifier
+      SaleId: SaleIdentifier
+      PawnItemId: PawnItemIdentifier
+      Quantity: Int
+      UnitPrice: BigDecimal
+      Subtotal: BigDecimal
+    }
+  }
+
+  ' Relationships
+  PawnLoan --> LoanIdentifier
+  PawnLoan --> PawnItemIdentifier
+  PawnTicket --> LoanIdentifier
+  PawnTicket --> CustomerIdentifier
+  PawnTicket --> PawnItemIdentifier
+  PawnPurchase --> PawnItemIdentifier
+  PawnPurchase --> CustomerIdentifier
+  PawnPurchase --> EmployeeIdentifier
+  PawnPurchase --> ConsultantIdentifier
+  PawnItem --> PawnItemIdentifier
+  Inventory --> InventoryIdentifier
+  Customer --> CustomerIdentifier
+  Customer --> Address
+  Customer --> PhoneNumber
+  Customer --> GovernmentId
+  Employee --> Address
+  Employee --> PhoneNumber
+  Consultant --> Address
+  Consultant --> PhoneNumber
+  Appraisal --> PawnItemIdentifier
+  Appraisal --> ConsultantIdentifier
+  Appraisal --> EmployeeIdentifier
+  Payments --> PaymentIdentifier
+  Payments --> LoanIdentifier
+  Payments --> CustomerIdentifier
+  Payments --> EmployeeIdentifier
+  Payments --> PawnPurchaseIdentifier
+  Sale --> SaleIdentifier
+  Sale --> CustomerIdentifier
+  Sale --> EmployeeIdentifier
+  Sale --> PaymentIdentifier
+  SaleItem --> SaleItemIdentifier
+  SaleItem --> SaleIdentifier
+  SaleItem --> PawnItemIdentifier
+}
+@enduml
