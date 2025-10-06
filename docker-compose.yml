@@ -18,7 +18,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-users/users-db
-      - SPRING_SQL_INIT_MODE=never
+      #- SPRING_SQL_INIT_MODE=never
     depends_on:
       mysql-users:
         condition: service_healthy
@@ -30,7 +30,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-workouts/workouts-db
-      - SPRING_SQL_INIT_MODE=never
+      #- SPRING_SQL_INIT_MODE=never
     depends_on:
       mysql-workouts:
         condition: service_healthy
@@ -42,7 +42,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-meals/meals-db
-      - SPRING_SQL_INIT_MODE=never
+      #- SPRING_SQL_INIT_MODE=never
     depends_on:
       postgres-meals:
         condition: service_healthy
